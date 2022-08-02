@@ -16,7 +16,32 @@ class InclusionCriteria:
         )
 
     @staticmethod
-    def _ic_over18(df_in: pd.DataFrame):
+    def _ic_dropna(df_in: pd.DataFrame) -> pd.DataFrame:
+        cols = [
+            "AGE",
+            "FEMALE",
+            "RACE",
+            "PAY1",
+            "APRDRG_Severity",
+            "APRDRG_Risk_Mortality",
+        ]
+
+        df_in = df_in.dropna(subset=cols, how="any")
+
+        # This is only necessary if working with a subset of the data
+        if "ZIPINC" not in df_in:
+            df_in["ZIPINC"] = pd.NA
+
+        if "ZIPINC_QRTL" not in df_in:
+            df_in["ZIPINC_QRTL"] = pd.NA
+
+        # Can have either ZIPINC OR ZIPINC_QRTL
+        df_in = df_in.dropna(subset=["ZIPINC", "ZIPINC_QRTL"], how="all")
+
+        return df_in
+
+    @staticmethod
+    def _ic_over18(df_in: pd.DataFrame) -> pd.DataFrame:
         return df_in[df_in["AGE"] > 18]
 
     def apply_ic(self) -> pd.DataFrame:
@@ -31,7 +56,8 @@ class InclusionCriteria:
             logging.info(
                 f"{method_name} diff: {before_count - after_count} ({before_count} -> {after_count})"
             )
-        
+
+        logging.info(f"Success, final size: {len(df)}")
         return df
 
 
