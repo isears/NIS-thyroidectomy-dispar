@@ -42,4 +42,4 @@ if __name__ == "__main__":
         # Monitor memory usage
         df.info()
 
-    df.to_csv("./cache/thyroidectomies.csv")
+    df.to_csv("./cache/thyroidectomies.csv", index=False)
