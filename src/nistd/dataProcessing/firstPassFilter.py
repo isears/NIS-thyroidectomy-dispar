@@ -4,7 +4,7 @@ First-pass filter to isolate thyroidectomies from RAW NIS data
 import pandas as pd
 import glob
 import re
-from nistd.dataProcessing import thyroidectomy_codes
+from nistd.dataProcessing import thyroidectomy_codes, diagnosis_codes
 
 
 def get_proc_cols(all_cols):
@@ -32,10 +32,12 @@ if __name__ == "__main__":
         proc_cols = get_proc_cols(cols)
         dx_cols = get_dx_cols(cols)
 
-        for chunk in pd.read_stata(fname, chunksize=10**6):
+        for chunk in pd.read_stata(fname, chunksize=10**5):
             chunk = chunk[
                 chunk[proc_cols].isin(thyroidectomy_codes).any(axis="columns")
             ]
+
+            chunk = chunk[chunk[dx_cols].isin(diagnosis_codes).any(axis="columns")]
 
             df = df.append(chunk)
 
