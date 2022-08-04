@@ -24,6 +24,10 @@ class InclusionCriteria:
             "PAY1",
             "APRDRG_Severity",
             "APRDRG_Risk_Mortality",
+            "HOSP_LOCTEACH",
+            "HOSP_REGION",
+            "DIED",
+            "LOS",
         ]
 
         df_in = df_in.dropna(subset=cols, how="any")
@@ -41,8 +45,8 @@ class InclusionCriteria:
         return df_in
 
     @staticmethod
-    def _ic_over18(df_in: pd.DataFrame) -> pd.DataFrame:
-        return df_in[df_in["AGE"] > 18]
+    def _ic_age(df_in: pd.DataFrame) -> pd.DataFrame:
+        return df_in[df_in["AGE"] >= 18]
 
     def apply_ic(self) -> pd.DataFrame:
         ic_methods = [m for m in dir(self) if m.startswith("_ic")]
@@ -62,6 +66,6 @@ class InclusionCriteria:
 
 
 if __name__ == "__main__":
-    ic = InclusionCriteria(pd.read_csv("cache/thyroidectomies.csv"))
+    ic = InclusionCriteria(pd.read_csv("cache/thyroidectomies.csv", low_memory=False))
     filtered = ic.apply_ic()
     filtered.to_csv("cache/filtered.csv", index=False)
