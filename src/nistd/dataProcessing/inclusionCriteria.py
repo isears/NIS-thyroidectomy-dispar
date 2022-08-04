@@ -66,6 +66,6 @@ class InclusionCriteria:
 
 
 if __name__ == "__main__":
-    ic = InclusionCriteria(pd.read_csv("cache/thyroidectomies.csv", low_memory=False))
+    ic = InclusionCriteria(pd.read_parquet("cache/thyroidectomies.parquet"))
     filtered = ic.apply_ic()
-    filtered.to_csv("cache/filtered.csv", index=False)
+    filtered.to_parquet("cache/filtered.parquet", index=False)

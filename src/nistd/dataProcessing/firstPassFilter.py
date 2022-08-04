@@ -3,22 +3,12 @@ First-pass filter to isolate thyroidectomies from RAW NIS data
 """
 import pandas as pd
 import glob
-import re
-from nistd.dataProcessing import thyroidectomy_codes, diagnosis_codes
-
-
-def get_proc_cols(all_cols):
-    icd9_proc_cols = [col for col in all_cols if re.search("^PR[0-9]{1,2}$", col)]
-    icd10_proc_cols = [col for col in all_cols if re.search("^I10_PR[0-9]{1,2}$", col)]
-
-    return icd9_proc_cols + icd10_proc_cols
-
-
-def get_dx_cols(all_cols):
-    icd9_cols = [col for col in all_cols if re.search("^DX[0-9]{1,2}$", col)]
-    icd10_cols = [col for col in all_cols if re.search("^I10_DX[0-9]{1,2}$", col)]
-
-    return icd9_cols + icd10_cols
+from nistd.dataProcessing import (
+    thyroidectomy_codes,
+    diagnosis_codes,
+    get_dx_cols,
+    get_proc_cols,
+)
 
 
 if __name__ == "__main__":
@@ -44,4 +34,4 @@ if __name__ == "__main__":
         # Monitor memory usage
         df.info()
 
-    df.to_csv("./cache/thyroidectomies.csv", index=False)
+    df.to_parquet("./cache/thyroidectomies.parquet", index=False)
