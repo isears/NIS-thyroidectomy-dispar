@@ -34,4 +34,4 @@ if __name__ == "__main__":
         # Monitor memory usage
         df.info()
 
-    df.to_parquet("./cache/thyroidectomies.parquet", index=False)
+    df.to_stata("./cache/thyroidectomies.dta", index=False)
