@@ -1,4 +1,6 @@
 import re
+import pandas as pd
+
 
 # Malignant neoplasm of thyroid gland
 diagnosis_icd9 = ["193"]
@@ -36,3 +38,7 @@ def get_dx_cols(all_cols):
     icd10_cols = [col for col in all_cols if re.search("^I10_DX[0-9]{1,2}$", col)]
 
     return icd9_cols + icd10_cols
+
+
+def get_dtypes():
+    return pd.read_csv("cache/dtypes.csv", index_col=0).squeeze("columns").to_dict()

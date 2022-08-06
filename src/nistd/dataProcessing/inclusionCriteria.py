@@ -6,6 +6,7 @@ Apply study inclusion criteria:
 """
 import pandas as pd
 from nistd import logging
+from nistd.dataProcessing import get_dtypes
 
 
 class InclusionCriteria:
@@ -66,6 +67,7 @@ class InclusionCriteria:
 
 
 if __name__ == "__main__":
-    ic = InclusionCriteria(pd.read_stata("cache/thyroidectomies.dta"))
+    df = pd.read_csv("cache/thyroidectomies.csv", dtype=get_dtypes())
+    ic = InclusionCriteria(df)
     filtered = ic.apply_ic()
-    filtered.to_stata("cache/filtered.dta", index=False)
+    filtered.to_csv("cache/filtered.csv")
