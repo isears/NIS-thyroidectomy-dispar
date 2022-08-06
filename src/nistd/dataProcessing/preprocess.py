@@ -36,9 +36,6 @@ def validate(df: pd.DataFrame) -> None:
     for race_column in race_columns:
         assert_binary(race_column)
 
-    # Income
-    assert_binary("INCOME_QRTL")
-
     # Hospital type
     hosp_type_columns = [c for c in df.columns if c.startswith("HOSP_LOCTEACH_")]
     for hosp_type_column in hosp_type_columns:
@@ -75,8 +72,20 @@ if __name__ == "__main__":
         float
     )
 
+    df_in["INCOME_QRTL"] = df_in.apply(
+        lambda row: row["ZIPINC_QRTL"] if row["ZIPINC_QRTL"] else row["ZIPINC"], axis=1
+    )
+
     # One-hot encoded columns
-    ohe_columns = ["PAY1", "RACE", "FEMALE", "HOSP_LOCTEACH", "HOSP_REGION"]
+    ohe_columns = [
+        "PAY1",
+        "RACE",
+        "FEMALE",
+        "HOSP_LOCTEACH",
+        "HOSP_REGION",
+        "INCOME_QRTL",
+    ]
+
     dumdums = pd.get_dummies(
         df_in[ohe_columns],
         columns=ohe_columns,
@@ -86,17 +95,12 @@ if __name__ == "__main__":
             "FEMALE": "SEX",
             "HOSP_LOCTEACH": "HOSP_LOCTEACH",
             "HOSP_REGION": "HOSP_REGION",
+            "INCOME_QRTL": "INCOME_QRTL",
         },
         dummy_na=True,
         dtype=float,
     )
     df_out = pd.concat([df_out, dumdums], axis=1)
-
-    df_out["INCOME_QRTL"] = df_in.apply(
-        lambda row: row["ZIPINC_QRTL"] if row["ZIPINC_QRTL"] else row["ZIPINC"], axis=1
-    )
-
-    df_out["INCOME_QRTL"] = (df_out["INCOME_QRTL"] > 2).astype(float)
 
     # Either simply defined prolonged length of stay as LOS > 2 or
     # More than one day after procedure
@@ -143,14 +147,6 @@ if __name__ == "__main__":
         return float(or_return)
 
     df_out["OR_RETURN"] = df_in.apply(returned_to_OR, axis=1)
-
-    # Remove binary columns with low variance
-    for c in df_out.columns:
-        if df_out[c].isin([0.0, 1.0]).all():
-            ratio = df_out[c].sum() / len(df_out)
-            if ratio > 0.99 or ratio < 0.01 and c not in label_cols:
-                logging.info(f"Dropping column {c} for having too little information")
-                df_out = df_out.drop(c, axis=1)
 
     validate(df_out)
     df_out.to_csv("cache/preprocessed.csv", index=False)
