@@ -1,11 +1,15 @@
 import pandas as pd
-from nistd.dataProcessing import label_cols
+import numpy as np
+from nistd.dataProcessing import label_cols, get_dtypes
 
 if __name__ == "__main__":
-    df = pd.read_csv("cache/preprocessed.csv")
+    processed_df = pd.read_csv("cache/preprocessed.csv")
+    filtered_df = pd.read_csv("cache/filtered.csv", dtype=get_dtypes())
 
-    variables_df = df[[c for c in df.columns if c not in label_cols]]
-    outcomes_df = df[[c for c in df.columns if c in label_cols]]
+    variables_df = processed_df[
+        [c for c in processed_df.columns if c not in label_cols]
+    ]
+    outcomes_df = processed_df[[c for c in processed_df.columns if c in label_cols]]
 
     all_n, all_percent = list(), list()
 
@@ -25,6 +29,14 @@ if __name__ == "__main__":
 
     table1_df["N (%)"] = table1_df.apply(
         lambda row: f"{row['N']} ({row['%']:.2f})", axis=1
+    )
+
+    # Get age mean / sem
+    age_mean = filtered_df["AGE"].mean()
+    age_sem = filtered_df["AGE"].std() / np.sqrt(len(filtered_df))
+    as_str = f"{age_mean:.2f} +/- {age_sem:.2f}"
+    table1_df = pd.concat(
+        [pd.DataFrame(data={"N (%)": as_str}, index=["Age mean"]), table1_df]
     )
 
     table1_df.to_csv("results/table1.csv")
