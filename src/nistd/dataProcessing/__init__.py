@@ -2,6 +2,8 @@ import re
 import pandas as pd
 
 
+label_cols = ["DIED", "PROLONGED_LOS", "OR_RETURN"]
+
 # Malignant neoplasm of thyroid gland
 diagnosis_icd9 = ["193"]
 diagnosis_icd10 = ["C73"]
@@ -42,3 +44,11 @@ def get_dx_cols(all_cols):
 
 def get_dtypes():
     return pd.read_csv("cache/dtypes.csv", index_col=0).squeeze("columns").to_dict()
+
+
+# TODO
+raw_var_to_name = {
+    "AGE": "Age > 65",
+    "APRDRG_Severity": "APRDRG Severity > 2",
+    "APRDRG_RISK_Mortality": "APRDRG Risk Mortality > 1",
+}

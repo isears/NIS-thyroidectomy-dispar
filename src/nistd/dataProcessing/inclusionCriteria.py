@@ -18,10 +18,9 @@ class InclusionCriteria:
 
     @staticmethod
     def _ic_dropna(df_in: pd.DataFrame) -> pd.DataFrame:
+        # We can handle FEMALE and RACE missing, but need other columns
         cols = [
             "AGE",
-            "FEMALE",
-            "RACE",
             "PAY1",
             "APRDRG_Severity",
             "APRDRG_Risk_Mortality",

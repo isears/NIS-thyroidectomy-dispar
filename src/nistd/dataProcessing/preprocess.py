@@ -8,50 +8,44 @@ from nistd.dataProcessing import (
     or_return_codes,
     get_proc_cols,
     get_dtypes,
+    label_cols,
 )
+import numpy as np
 
 
 def validate(df: pd.DataFrame) -> None:
     def assert_binary(column_name: str):
         assert df[column_name].isin([1.0, 0.0]).all()
 
+        ratio = df[column_name].sum() / len(df)
+        if ratio > 0.99 or ratio < 0.01:
+            logging.warning(f"High homogeneity in {column_name} ({ratio})")
+
     for column in df.columns:
         assert df[column].dtype == float, f"Found non-float column: {column}"
+        assert not df[column].isna().any(), f"{column} has nans"
+        assert not df[column].apply(lambda x: np.isinf(x)).any(), f"{column} has infs"
 
-    # AGE
-    assert df["AGE"].max() < 200
-    assert df["AGE"].min() >= 18
-
-    # FEMALE
-    assert_binary("FEMALE")
+    # SEX
+    sex_columns = [c for c in df.columns if c.startswith("SEX_")]
+    for sex_column in sex_columns:
+        assert_binary(sex_column)
 
     # RACE
     race_columns = [c for c in df.columns if c.startswith("RACE_")]
-    assert len(race_columns) == 6
     for race_column in race_columns:
         assert_binary(race_column)
-
-    # APRDRG
-    for aprdrg in ["APRDRG_Severity", "APRDRG_Risk_Mortality"]:
-        assert df[aprdrg].max() == 4
-        assert df[aprdrg].min() == 0
-
-    # Insurance status
-    insurance_columns = [c for c in df.columns if c.startswith("PAY1_")]
-    assert len(insurance_columns) == 6
 
     # Income
     assert_binary("INCOME_QRTL")
 
     # Hospital type
     hosp_type_columns = [c for c in df.columns if c.startswith("HOSP_LOCTEACH_")]
-    assert len(hosp_type_columns) == 3
     for hosp_type_column in hosp_type_columns:
         assert_binary(hosp_type_column)
 
     # Hospital region
     hosp_region_columns = [c for c in df.columns if c.startswith("HOSP_REGION_")]
-    assert len(hosp_region_columns) == 4
     for hosp_region_column in hosp_region_columns:
         assert_binary(hosp_region_column)
 
@@ -71,24 +65,29 @@ if __name__ == "__main__":
     df_in = pd.read_csv("cache/filtered.csv", dtype=get_dtypes())
     df_out = pd.DataFrame()
 
-    copy_cols = ["AGE", "FEMALE", "APRDRG_Severity", "APRDRG_Risk_Mortality", "DIED"]
+    copy_cols = ["AGE", "APRDRG_Severity", "APRDRG_Risk_Mortality", "DIED"]
     for cc in copy_cols:
         df_out[cc] = df_in[cc]
 
+    df_out["AGE"] = (df_out["AGE"] > 65).astype(float)
+    df_out["APRDRG_Severity"] = (df_out["APRDRG_Severity"] > 2).astype(float)
+    df_out["APRDRG_Risk_Mortality"] = (df_out["APRDRG_Risk_Mortality"] > 1).astype(
+        float
+    )
+
     # One-hot encoded columns
-    ohe_columns = ["PAY1", "RACE", "HOSP_LOCTEACH", "HOSP_REGION"]
-    # If this fails, it's b/c we didn't drop na in inclusion criteria
-    df_in[ohe_columns] = df_in[ohe_columns].astype("int")
+    ohe_columns = ["PAY1", "RACE", "FEMALE", "HOSP_LOCTEACH", "HOSP_REGION"]
     dumdums = pd.get_dummies(
         df_in[ohe_columns],
         columns=ohe_columns,
         prefix={
             "PAY1": "PAY1",
             "RACE": "RACE",
+            "FEMALE": "SEX",
             "HOSP_LOCTEACH": "HOSP_LOCTEACH",
             "HOSP_REGION": "HOSP_REGION",
         },
-        dummy_na=False,
+        dummy_na=True,
         dtype=float,
     )
     df_out = pd.concat([df_out, dumdums], axis=1)
@@ -139,11 +138,19 @@ if __name__ == "__main__":
             or_return_num = or_return_num[or_return_num.index("PR") + 2 :]
 
             if int(thyroidectomy_procnum) > int(or_return_num):
-                logging.warning("Detected OR return piror to thyroidectomy")
+                logging.warning("Detected OR return prior to thyroidectomy")
 
         return float(or_return)
 
     df_out["OR_RETURN"] = df_in.apply(returned_to_OR, axis=1)
+
+    # Remove binary columns with low variance
+    for c in df_out.columns:
+        if df_out[c].isin([0.0, 1.0]).all():
+            ratio = df_out[c].sum() / len(df_out)
+            if ratio > 0.99 or ratio < 0.01 and c not in label_cols:
+                logging.info(f"Dropping column {c} for having too little information")
+                df_out = df_out.drop(c, axis=1)
 
     validate(df_out)
     df_out.to_csv("cache/preprocessed.csv", index=False)
