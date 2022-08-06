@@ -3,7 +3,12 @@ Prepare raw (filtered) NIS data for use in models
 """
 import pandas as pd
 from nistd import logging
-from nistd.dataProcessing import thyroidectomy_codes, or_return_codes, get_proc_cols
+from nistd.dataProcessing import (
+    thyroidectomy_codes,
+    or_return_codes,
+    get_proc_cols,
+    get_dtypes,
+)
 
 
 def validate(df: pd.DataFrame) -> None:
@@ -15,7 +20,7 @@ def validate(df: pd.DataFrame) -> None:
 
     # AGE
     assert df["AGE"].max() < 200
-    assert df["AGE"].min() > 18
+    assert df["AGE"].min() >= 18
 
     # FEMALE
     assert_binary("FEMALE")
@@ -39,14 +44,14 @@ def validate(df: pd.DataFrame) -> None:
     assert_binary("INCOME_QRTL")
 
     # Hospital type
-    hosp_type_columns = [c for c in df.columns if c.startswith("HOSP_LOCTECH_")]
+    hosp_type_columns = [c for c in df.columns if c.startswith("HOSP_LOCTEACH_")]
     assert len(hosp_type_columns) == 3
     for hosp_type_column in hosp_type_columns:
         assert_binary(hosp_type_column)
 
     # Hospital region
     hosp_region_columns = [c for c in df.columns if c.startswith("HOSP_REGION_")]
-    assert len(hosp_type_columns) == 4
+    assert len(hosp_region_columns) == 4
     for hosp_region_column in hosp_region_columns:
         assert_binary(hosp_region_column)
 
@@ -63,7 +68,7 @@ def validate(df: pd.DataFrame) -> None:
 
 if __name__ == "__main__":
     # TODO: need to load ICD dx / proc columns as str, not float
-    df_in = pd.read_csv("cache/filtered.csv", low_memory=False)
+    df_in = pd.read_csv("cache/filtered.csv", dtype=get_dtypes())
     df_out = pd.DataFrame()
 
     copy_cols = ["AGE", "FEMALE", "APRDRG_Severity", "APRDRG_Risk_Mortality", "DIED"]
@@ -72,6 +77,8 @@ if __name__ == "__main__":
 
     # One-hot encoded columns
     ohe_columns = ["PAY1", "RACE", "HOSP_LOCTEACH", "HOSP_REGION"]
+    # If this fails, it's b/c we didn't drop na in inclusion criteria
+    df_in[ohe_columns] = df_in[ohe_columns].astype("int")
     dumdums = pd.get_dummies(
         df_in[ohe_columns],
         columns=ohe_columns,
@@ -111,7 +118,7 @@ if __name__ == "__main__":
         assert int(proc_num) <= 110
 
         proc_day = row[f"PRDAY{proc_num}"]
-        return row["LOS"] > proc_day + 1
+        return float(row["LOS"] > proc_day + 1)
 
     df_out["PROLONGED_LOS"] = df_in.apply(is_los_prolonged, axis=1)
 
@@ -132,9 +139,9 @@ if __name__ == "__main__":
             or_return_num = or_return_num[or_return_num.index("PR") + 2 :]
 
             if int(thyroidectomy_procnum) > int(or_return_num):
-                logging.warn("Detected OR return piror to thyroidectomy")
+                logging.warning("Detected OR return piror to thyroidectomy")
 
-        return or_return
+        return float(or_return)
 
     df_out["OR_RETURN"] = df_in.apply(returned_to_OR, axis=1)
 
