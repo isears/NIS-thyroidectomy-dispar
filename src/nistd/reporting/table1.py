@@ -9,7 +9,6 @@ if __name__ == "__main__":
     variables_df = processed_df[
         [c for c in processed_df.columns if c not in label_cols]
     ]
-    outcomes_df = processed_df[[c for c in processed_df.columns if c in label_cols]]
 
     all_n, all_percent = list(), list()
 
