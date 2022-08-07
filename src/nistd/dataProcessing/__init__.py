@@ -47,8 +47,25 @@ def get_dtypes():
 
 
 # TODO
-raw_var_to_name = {
-    "AGE": "Age > 65",
-    "APRDRG_Severity": "APRDRG Severity > 2",
-    "APRDRG_RISK_Mortality": "APRDRG Risk Mortality > 1",
+categorical_lookup = {
+    "FEMALE": ["Male", "Female", "Unknown"],
+    "RACE": [
+        "White",
+        "Black",
+        "Hispanic",
+        "Asian or Pacific Islander",
+        "Native American",
+        "Other",
+        "Unknown",
+    ],
+    "PAY1": [
+        "Medicare",
+        "Medicaid",
+        "Private insurance",
+        "Self-pay",
+        "No charge",
+        "Other",
+    ],
+    "HOSP_LOCTEACH": ["Rural", "Urban nonteaching", "Urban teaching"],
+    "HOSP_REGION": ["Northeast", "Midwest", "South", "West"],
 }

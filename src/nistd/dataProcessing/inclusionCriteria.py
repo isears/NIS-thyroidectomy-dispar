@@ -32,13 +32,6 @@ class InclusionCriteria:
 
         df_in = df_in.dropna(subset=cols, how="any")
 
-        # This is only necessary if working with a subset of the data
-        if "ZIPINC" not in df_in:
-            df_in["ZIPINC"] = pd.NA
-
-        if "ZIPINC_QRTL" not in df_in:
-            df_in["ZIPINC_QRTL"] = pd.NA
-
         # Can have either ZIPINC OR ZIPINC_QRTL
         df_in = df_in.dropna(subset=["ZIPINC", "ZIPINC_QRTL"], how="all")
 

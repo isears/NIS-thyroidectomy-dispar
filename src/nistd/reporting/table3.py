@@ -1,4 +1,4 @@
-import statsmodels.api as sm
+import statsmodels.formula.api as sm
 import numpy as np
 import pandas as pd
 from scipy.stats import fisher_exact
@@ -10,33 +10,50 @@ def lr_or(df: pd.DataFrame):
     """
     Use a logistic regression model to compute Odds Ratios
     """
-    df = pd.read_csv("cache/preprocessed.csv", dtype=get_dtypes())
+    # TODO: move to more global util class?
+    categoricals = [
+        "SEX",
+        "HOSP_LOCTEACH",
+        "HOSP_REGION",
+        "INCOME_QRTL",
+        "PAY1",
+        "RACE",
+    ]
 
-    y = df[label_cols[2]].values
-    assert np.logical_or(y == 0.0, y == 1.0).all()
-    X_df = df.drop(label_cols, axis=1)
-    X = X_df.values
+    independent_vars = [c for c in df.columns if c not in label_cols]
 
-    logging.info(f"Proportion positive examples: {y.sum() / len(y)}")
-    lr = sm.Logit(y, X)
-    res = lr.fit(method="bfgs", maxiter=1000)
+    for c in categoricals:
+        independent_vars[independent_vars.index(c)] = f"C({c})"
 
-    odds_ratios = np.exp(res.params)
-    lower_ci = np.exp(res.conf_int()[:, 0])
-    upper_ci = np.exp(res.conf_int()[:, 1])
+    independent_vars = " + ".join(independent_vars)
 
-    table3 = pd.DataFrame(
-        data={
-            "Odds Ratios": odds_ratios,
-            "Lower CI": lower_ci,
-            "Upper CI": upper_ci,
-            "P Value": res.pvalues,
-        }
-    )
+    for outcome in label_cols:
+        formula_str = f"{outcome} ~ " + independent_vars
 
-    table3.index = X_df.columns
+        logging.info(f"Formula string: {formula_str}")
+        lr = sm.logit(formula_str, data=df)
+        res = lr.fit_regularized()
 
-    print(table3)
+        odds_ratios = np.exp(res.params)
+        lower_ci = np.exp(res.conf_int()[0])
+        upper_ci = np.exp(res.conf_int()[1])
+
+        table3 = pd.DataFrame(
+            data={
+                "Odds Ratios": odds_ratios,
+                "Lower CI": lower_ci,
+                "Upper CI": upper_ci,
+                "P Value": res.pvalues,
+            },
+            index=res.params.index,
+        )
+
+        print(table3)
+
+        save_path = f"results/table3_{outcome}.csv"
+        logging.info(f"Computation complete, saving to {save_path}")
+
+        table3.to_csv(save_path)
 
 
 def lr_manual(df: pd.DataFrame):
@@ -91,5 +108,5 @@ def lr_manual(df: pd.DataFrame):
 
 
 if __name__ == "__main__":
-    df = pd.read_csv("cache/preprocessed.csv", dtype=get_dtypes())
-    lr_manual(df)
+    df = pd.read_csv("cache/preprocessed.csv")
+    lr_or(df)

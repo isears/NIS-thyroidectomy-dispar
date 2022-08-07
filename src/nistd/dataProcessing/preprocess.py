@@ -9,6 +9,7 @@ from nistd.dataProcessing import (
     get_proc_cols,
     get_dtypes,
     label_cols,
+    categorical_lookup,
 )
 import numpy as np
 
@@ -62,49 +63,29 @@ if __name__ == "__main__":
     df_in = pd.read_csv("cache/filtered.csv", dtype=get_dtypes())
     df_out = pd.DataFrame()
 
-    copy_cols = ["AGE", "APRDRG_Severity", "APRDRG_Risk_Mortality", "DIED"]
-    for cc in copy_cols:
-        df_out[cc] = df_in[cc]
-
-    df_out["AGE"] = (df_out["AGE"] > 65).astype(float)
-    df_out["APRDRG_Severity"] = (df_out["APRDRG_Severity"] > 2).astype(float)
-    df_out["APRDRG_Risk_Mortality"] = (df_out["APRDRG_Risk_Mortality"] > 1).astype(
-        float
-    )
-
-    df_in["INCOME_QRTL"] = df_in.apply(
-        lambda row: row["ZIPINC_QRTL"] if row["ZIPINC_QRTL"] else row["ZIPINC"], axis=1
-    )
-
-    # One-hot encoded columns
-    ohe_columns = [
+    copy_cols = [
+        "AGE",
+        "APRDRG_Severity",
+        "APRDRG_Risk_Mortality",
+        "DIED",
         "PAY1",
         "RACE",
         "FEMALE",
         "HOSP_LOCTEACH",
         "HOSP_REGION",
-        "INCOME_QRTL",
     ]
 
-    dumdums = pd.get_dummies(
-        df_in[ohe_columns],
-        columns=ohe_columns,
-        prefix={
-            "PAY1": "PAY1",
-            "RACE": "RACE",
-            "FEMALE": "SEX",
-            "HOSP_LOCTEACH": "HOSP_LOCTEACH",
-            "HOSP_REGION": "HOSP_REGION",
-            "INCOME_QRTL": "INCOME_QRTL",
-        },
-        dummy_na=True,
-        dtype=float,
-    )
-    df_out = pd.concat([df_out, dumdums], axis=1)
+    # FEMALE, RACE may have NAs
+    df_in["FEMALE"] = df_in["FEMALE"].fillna(2)
+    df_in["RACE"] = df_in["RACE"].fillna(7)
 
-    # Either simply defined prolonged length of stay as LOS > 2 or
-    # More than one day after procedure
-    # df_out["PROLONGED_LOS"] = (df_in["LOS"] > 2).astype(float)
+    for cc in copy_cols:
+        df_out[cc] = df_in[cc].astype(int)
+
+    df_out["INCOME_QRTL"] = df_in["ZIPINC_QRTL"].fillna(df_in["ZIPINC"])
+    assert not df_out["INCOME_QRTL"].isna().any()
+    df_out["INCOME_QRTL"] = df_out["INCOME_QRTL"].astype(int)
+
     proc_cols = get_proc_cols(df_in.columns)
 
     def is_los_prolonged(row):
@@ -121,7 +102,7 @@ if __name__ == "__main__":
         assert int(proc_num) <= 110
 
         proc_day = row[f"PRDAY{proc_num}"]
-        return float(row["LOS"] > proc_day + 1)
+        return int(row["LOS"] > proc_day + 1)
 
     df_out["PROLONGED_LOS"] = df_in.apply(is_los_prolonged, axis=1)
 
@@ -144,9 +125,17 @@ if __name__ == "__main__":
             if int(thyroidectomy_procnum) > int(or_return_num):
                 logging.warning("Detected OR return prior to thyroidectomy")
 
-        return float(or_return)
+        return int(or_return)
 
     df_out["OR_RETURN"] = df_in.apply(returned_to_OR, axis=1)
 
-    validate(df_out)
+    for key, lookup_table in categorical_lookup.items():
+        # FEMALE is 0, 1, but all other columns don't have a 0 val
+        if key == "FEMALE":
+            df_out[key] = df_out[key].apply(lambda x: lookup_table[x])
+        else:
+            df_out[key] = df_out[key].apply(lambda x: lookup_table[x - 1])
+
+    df_out = df_out.rename(columns={"FEMALE": "SEX"})
+
     df_out.to_csv("cache/preprocessed.csv", index=False)
