@@ -36,4 +36,5 @@ if __name__ == "__main__":
         [pd.DataFrame(data={"N (%)": as_str}, index=["LOS mean"]), table2_df]
     )
 
+    table2_df = table2_df.drop(columns=["N", "%"])
     table2_df.to_csv("results/table2.csv")

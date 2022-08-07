@@ -3,6 +3,16 @@ import pandas as pd
 
 
 label_cols = ["DIED", "PROLONGED_LOS", "OR_RETURN"]
+categorical_cols = [
+    "SEX",
+    "HOSP_LOCTEACH",
+    "HOSP_REGION",
+    "INCOME_QRTL",
+    "PAY1",
+    "RACE",
+]
+
+continuous_cols = ["LOS", "AGE"]
 
 # Malignant neoplasm of thyroid gland
 diagnosis_icd9 = ["193"]
@@ -46,7 +56,6 @@ def get_dtypes():
     return pd.read_csv("cache/dtypes.csv", index_col=0).squeeze("columns").to_dict()
 
 
-# TODO
 categorical_lookup = {
     "FEMALE": ["Male", "Female", "Unknown"],
     "RACE": [

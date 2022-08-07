@@ -2,7 +2,7 @@ import statsmodels.formula.api as sm
 import numpy as np
 import pandas as pd
 from scipy.stats import fisher_exact
-from nistd.dataProcessing import get_dtypes, label_cols
+from nistd.dataProcessing import get_dtypes, label_cols, categorical_cols
 from nistd import logging
 
 

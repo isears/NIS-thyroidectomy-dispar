@@ -1,34 +1,31 @@
 import pandas as pd
 import numpy as np
-from nistd.dataProcessing import label_cols, get_dtypes
+from nistd.dataProcessing import label_cols, categorical_cols, get_dtypes
 
 if __name__ == "__main__":
     processed_df = pd.read_csv("cache/preprocessed.csv")
     filtered_df = pd.read_csv("cache/filtered.csv", dtype=get_dtypes())
 
-    variables_df = processed_df[
-        [c for c in processed_df.columns if c not in label_cols]
+    categoricals = processed_df[
+        [c for c in processed_df.columns if c in categorical_cols]
     ]
 
     all_n, all_percent = list(), list()
+    table1_df = pd.DataFrame()
 
-    for variable_name in variables_df.columns:
-        # Assuming all are binary
-        assert variables_df[variable_name].isin([0.0, 1.0]).all()
+    for variable_name in categoricals.columns:
+        vc = categoricals[variable_name].value_counts()
 
-        n = variables_df[variable_name].sum()
-        percent = (n / len(variables_df)) * 100
+        def format_n(n):
+            percent = n / len(processed_df) * 100
+            return f"{n} ({percent:.2f})"
 
-        all_n.append(n)
-        all_percent.append(percent)
-
-    table1_df = pd.DataFrame(
-        data={"N": all_n, "%": all_percent}, index=variables_df.columns
-    )
-
-    table1_df["N (%)"] = table1_df.apply(
-        lambda row: f"{row['N']} ({row['%']:.2f})", axis=1
-    )
+        table1_df = table1_df.append(
+            pd.DataFrame(
+                data={"N (%)": vc.apply(format_n).values},
+                index=vc.index.map(lambda x: f"[{vc.name}] {x}"),
+            )
+        )
 
     # Get age mean / sem
     age_mean = filtered_df["AGE"].mean()
