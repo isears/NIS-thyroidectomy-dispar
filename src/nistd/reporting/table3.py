@@ -10,20 +10,28 @@ def lr_or(df: pd.DataFrame):
     """
     Use a logistic regression model to compute Odds Ratios
     """
+
     # TODO: move to more global util class?
     categoricals = [
         "SEX",
         "HOSP_LOCTEACH",
         "HOSP_REGION",
-        "INCOME_QRTL",
+        # "INCOME_QRTL",
         "PAY1",
         "RACE",
+        # "APRDRG_Severity",
+        # "APRDRG_Risk_Mortality",
     ]
 
     independent_vars = [c for c in df.columns if c not in label_cols]
 
     for c in categoricals:
-        independent_vars[independent_vars.index(c)] = f"C({c})"
+        # Set the reference category for every category as the category with the largest # of samples
+        reference_group = df[c].value_counts().index[0]
+        independent_vars[
+            independent_vars.index(c)
+        ] = f"C({c}, Treatment(reference='{reference_group}'))"
+        df[c] = df[c].astype("str")
 
     independent_vars = " + ".join(independent_vars)
 
@@ -38,6 +46,15 @@ def lr_or(df: pd.DataFrame):
         lower_ci = np.exp(res.conf_int()[0])
         upper_ci = np.exp(res.conf_int()[1])
 
+        def unwrap_pnames(param_name: str):
+            try:
+                ref = param_name.split("'")[1]
+                var = param_name[param_name.index("T.") + 2 : -1]
+
+                return f"{var} (compared to: {ref})"
+            except IndexError:
+                return param_name
+
         table3 = pd.DataFrame(
             data={
                 "Odds Ratios": odds_ratios,
@@ -45,9 +62,15 @@ def lr_or(df: pd.DataFrame):
                 "Upper CI": upper_ci,
                 "P Value": res.pvalues,
             },
-            index=res.params.index,
+            index=res.params.index,  # .map(unwrap_pnames),
         )
 
+        table3.index = table3.index.map(unwrap_pnames)
+        table3 = table3.drop(index="Intercept")
+
+        # TODO: Every class has one group that doesn't appear in params b/c it's the reference class
+        # Need to do a better job of selecting this
+        # https://stackoverflow.com/questions/22431503/specifying-which-category-to-treat-as-the-base-with-statsmodels
         print(table3)
 
         save_path = f"results/table3_{outcome}.csv"
