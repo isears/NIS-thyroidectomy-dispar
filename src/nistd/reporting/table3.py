@@ -25,8 +25,15 @@ def lr_or(df: pd.DataFrame):
 
     independent_vars = [c for c in df.columns if c not in label_cols]
 
+    # Binarize the non-categorical variables
+    df["INCOME_QRTL"] = df["INCOME_QRTL"] > 2
+    df["AGE"] = df["AGE"] > 65
+    df["APRDRG_Severity"] = df["APRDRG_Severity"] > 2
+    df["APRDRG_Risk_Mortality"] = df["APRDRG_Risk_Mortality"] > 2
+
     for c in categoricals:
         # Set the reference category for every category as the category with the largest # of samples
+        # TODO: for one vs. rest odds ratios may just have to do several LR models, one for each category group
         reference_group = df[c].value_counts().index[0]
         independent_vars[
             independent_vars.index(c)
