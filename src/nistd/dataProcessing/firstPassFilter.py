@@ -4,8 +4,9 @@ First-pass filter to isolate thyroidectomies from RAW NIS data
 import pandas as pd
 import glob
 from nistd.dataProcessing import (
-    thyroidectomy_codes,
+    proc_codes,
     diagnosis_codes,
+    anastamosis_codes,
     get_dx_cols,
     get_proc_cols,
 )
@@ -13,6 +14,13 @@ from nistd.dataProcessing import (
 
 if __name__ == "__main__":
     df = pd.DataFrame()
+
+    print("[*] Procedure codes:")
+    print(proc_codes)
+    print("[*] Diagnosis codes:")
+    print(diagnosis_codes)
+    print("[*] Anastomosis codes:")
+    print(anastamosis_codes)
 
     for fname in glob.glob("./data/*.dta"):
         print(f"[*] Processing {fname}")
@@ -23,10 +31,8 @@ if __name__ == "__main__":
         dx_cols = get_dx_cols(cols)
 
         for chunk in pd.read_stata(fname, chunksize=10**5):
-            chunk = chunk[
-                chunk[proc_cols].isin(thyroidectomy_codes).any(axis="columns")
-            ]
-
+            chunk = chunk[chunk[proc_cols].isin(proc_codes).any(axis="columns")]
+            chunk = chunk[chunk[proc_cols].isin(anastamosis_codes).any(axis="columns")]
             chunk = chunk[chunk[dx_cols].isin(diagnosis_codes).any(axis="columns")]
 
             df = df.append(chunk)
@@ -34,4 +40,4 @@ if __name__ == "__main__":
         # Monitor memory usage
         df.info()
 
-    df.to_csv("./cache/thyroidectomies.csv", index=False)
+    df.to_csv("./cache/rectalcancer.csv", index=False)

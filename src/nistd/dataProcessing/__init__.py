@@ -14,28 +14,28 @@ categorical_cols = [
 
 continuous_cols = ["LOS", "AGE"]
 
-# Malignant neoplasm of thyroid gland
-diagnosis_icd9 = ["193"]
-diagnosis_icd10 = ["C73"]
+# Malignant neoplasm of rectum / rectosigmoid junction
+diagnosis_icd9 = ["1541", "154"]
+diagnosis_icd10 = ["C20", "C19"]
 
 diagnosis_codes = diagnosis_icd9 + diagnosis_icd10
 
-thyroidectomy_icd9 = [
-    "064",  # Complete thyroidectomy
-    "0652",  # Complete substernal thyroidectomy
+proc_icd9 = ["4869", "4852", "4862", "4863", "4864", "4859", "4851"]
+proc_icd10 = [
+    "0DTP0ZZ",
+    "0DTP4ZZ",
+    "0DTP7ZZ",
+    "0DTP8ZZ",
+    "0DBP3ZZ",
+    "0DBP4ZZ",
+    "0DBP8ZZ",
 ]
-thyroidectomy_icd10 = [
-    "0GTK0ZZ",  # Complete thyroidectomy (open)
-    "0GTK4ZZ",  # Complete thyroidectomy (percutaneous)
-]
 
-thyroidectomy_codes = thyroidectomy_icd9 + thyroidectomy_icd10
+proc_codes = proc_icd9 + proc_icd10
 
-# Control bleeding in neck
-or_return_icd9 = ["3998"]
-or_return_icd10 = ["0W360ZZ", "0W363ZZ", "0W364ZZ"]
-
-or_return_codes = or_return_icd9 + or_return_icd10
+# Anastomosis
+with open("cache/icdcodes/anastamosis.txt", "r") as f:
+    anastamosis_codes = [l.strip() for l in f.readlines()]
 
 
 def get_proc_cols(all_cols):
