@@ -5,20 +5,14 @@ Apply study inclusion criteria:
 - Procedure codes of interest
 """
 import pandas as pd
-from nistd import logging, ProcClass
-from nistd.dataProcessing import (
-    get_dtypes,
-    anastomosis_lap,
-    anastomosis_open,
-    proc_lap,
-    proc_open,
-)
+from nistd import logging
+from nistd.dataProcessing import get_dtypes, ProcClass, get_proc_cols
 
 
 class InclusionCriteria:
-    def __init__(self, base_df: pd.DataFrame, prefix: ProcClass) -> None:
+    def __init__(self, base_df: pd.DataFrame, pclass: ProcClass) -> None:
         self.base_df = base_df
-        self.prefix = prefix
+        self.pclass = pclass
         logging.info(
             f"Inclusion criteria filter instantiated with n={len(self.base_df)}"
         )
@@ -49,7 +43,11 @@ class InclusionCriteria:
         return df_in[df_in["AGE"] >= 18]
 
     def _ic_prefix(self, df_in: pd.DataFrame) -> pd.DataFrame:
-        raise NotImplemented
+        # Assume that if the original procedure was laparoscopic, the anastomosis was as well
+        proc_codes = self.pclass.getProcCodes()
+        return df_in[
+            df_in[get_proc_cols(df_in.columns)].isin(proc_codes).any("columns")
+        ]
 
     def apply_ic(self) -> pd.DataFrame:
         ic_methods = [m for m in dir(self) if m.startswith("_ic")]
@@ -69,7 +67,9 @@ class InclusionCriteria:
 
 
 if __name__ == "__main__":
-    df = pd.read_csv("cache/rectalcancer.csv", dtype=get_dtypes())
-    ic = InclusionCriteria(df)
-    filtered = ic.apply_ic()
-    filtered.to_csv("cache/filtered.csv")
+
+    for pclass in ProcClass:
+        df = pd.read_csv("cache/rectalcancer.csv", dtype=get_dtypes())
+        ic = InclusionCriteria(df, pclass)
+        filtered = ic.apply_ic()
+        filtered.to_csv(f"cache/filtered_{pclass.name}.csv")
