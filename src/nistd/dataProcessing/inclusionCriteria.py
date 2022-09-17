@@ -59,7 +59,7 @@ class InclusionCriteria:
 
 
 if __name__ == "__main__":
-    df = pd.read_csv("cache/thyroidectomies.csv", dtype=get_dtypes())
+    df = pd.read_csv("cache/rectalcancer.csv", dtype=get_dtypes())
     ic = InclusionCriteria(df)
     filtered = ic.apply_ic()
     filtered.to_csv("cache/filtered.csv")

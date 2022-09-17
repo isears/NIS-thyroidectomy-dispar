@@ -1,5 +1,7 @@
 import re
 import pandas as pd
+import importlib.resources as pkg_resources
+from nistd import icdcodes
 
 
 label_cols = ["DIED", "PROLONGED_LOS", "OR_RETURN"]
@@ -20,9 +22,10 @@ diagnosis_icd10 = ["C20", "C19"]
 
 diagnosis_codes = diagnosis_icd9 + diagnosis_icd10
 
-proc_icd9 = ["4869", "4852", "4862", "4863", "4864", "4859", "4851"]
-proc_icd10 = [
-    "0DTP0ZZ",
+proc_open = ["4869", "4852", "4861", "4862", "4863", "4864", "0DTP0ZZ"]
+proc_lap = [
+    "4859",
+    "4851",
     "0DTP4ZZ",
     "0DTP7ZZ",
     "0DTP8ZZ",
@@ -31,11 +34,12 @@ proc_icd10 = [
     "0DBP8ZZ",
 ]
 
-proc_codes = proc_icd9 + proc_icd10
+proc_codes = proc_open + proc_lap
 
 # Anastomosis
-with open("cache/icdcodes/anastamosis.txt", "r") as f:
-    anastamosis_codes = [l.strip() for l in f.readlines()]
+anastomosis_open = pkg_resources.read_text(icdcodes, "anastomosis_open.txt").split()
+anastomosis_lap = pkg_resources.read_text(icdcodes, "anastomosis_lap.txt").split()
+anastomosis_codes = anastomosis_open + anastomosis_lap
 
 
 def get_proc_cols(all_cols):

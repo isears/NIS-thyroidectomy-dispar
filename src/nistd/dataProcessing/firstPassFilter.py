@@ -6,7 +6,7 @@ import glob
 from nistd.dataProcessing import (
     proc_codes,
     diagnosis_codes,
-    anastamosis_codes,
+    anastomosis_codes,
     get_dx_cols,
     get_proc_cols,
 )
@@ -20,7 +20,7 @@ if __name__ == "__main__":
     print("[*] Diagnosis codes:")
     print(diagnosis_codes)
     print("[*] Anastomosis codes:")
-    print(anastamosis_codes)
+    print(anastomosis_codes)
 
     for fname in glob.glob("./data/*.dta"):
         print(f"[*] Processing {fname}")
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
         for chunk in pd.read_stata(fname, chunksize=10**5):
             chunk = chunk[chunk[proc_cols].isin(proc_codes).any(axis="columns")]
-            chunk = chunk[chunk[proc_cols].isin(anastamosis_codes).any(axis="columns")]
+            chunk = chunk[chunk[proc_cols].isin(anastomosis_codes).any(axis="columns")]
             chunk = chunk[chunk[dx_cols].isin(diagnosis_codes).any(axis="columns")]
 
             df = df.append(chunk)
