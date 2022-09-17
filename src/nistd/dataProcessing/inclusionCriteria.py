@@ -14,7 +14,7 @@ class InclusionCriteria:
         self.base_df = base_df
         self.pclass = pclass
         logging.info(
-            f"Inclusion criteria filter instantiated with n={len(self.base_df)}"
+            f"Inclusion criteria filter instantiated with n={len(self.base_df)} ({self.pclass.name})"
         )
 
     @staticmethod
@@ -46,7 +46,7 @@ class InclusionCriteria:
         # Assume that if the original procedure was laparoscopic, the anastomosis was as well
         proc_codes = self.pclass.getProcCodes()
         return df_in[
-            df_in[get_proc_cols(df_in.columns)].isin(proc_codes).any("columns")
+            df_in[get_proc_cols(df_in.columns)].isin(proc_codes).any(axis="columns")
         ]
 
     def apply_ic(self) -> pd.DataFrame:
