@@ -2,6 +2,7 @@ import re
 import pandas as pd
 import importlib.resources as pkg_resources
 from nistd import icdcodes
+from enum import Enum, auto
 
 
 label_cols = ["DIED", "PROLONGED_LOS", "OR_RETURN"]
@@ -22,24 +23,16 @@ diagnosis_icd10 = ["C20", "C19"]
 
 diagnosis_codes = diagnosis_icd9 + diagnosis_icd10
 
-proc_open = ["4869", "4852", "4861", "4862", "4863", "4864", "0DTP0ZZ"]
-proc_lap = [
-    "4859",
-    "4851",
-    "0DTP4ZZ",
-    "0DTP7ZZ",
-    "0DTP8ZZ",
-    "0DBP3ZZ",
-    "0DBP4ZZ",
-    "0DBP8ZZ",
-]
 
-proc_codes = proc_open + proc_lap
+class ProcClass(Enum):
+    OPEN = auto()
+    LAPAROSCOPIC = auto()
 
-# Anastomosis
-anastomosis_open = pkg_resources.read_text(icdcodes, "anastomosis_open.txt").split()
-anastomosis_lap = pkg_resources.read_text(icdcodes, "anastomosis_lap.txt").split()
-anastomosis_codes = anastomosis_open + anastomosis_lap
+    def getProcCodes(self):
+        return pkg_resources.read_text(icdcodes, f"proc_{self.name}.txt").split()
+
+    def getAnastomosisCodes(self):
+        return pkg_resources.read_text(icdcodes, f"anastomosis_{self.name}.txt").split()
 
 
 def get_proc_cols(all_cols):
