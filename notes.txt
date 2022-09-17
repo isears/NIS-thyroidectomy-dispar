@@ -1,3 +1,9 @@
 Design decisions:
 - Not using codes in grey-ed out column 
 - Because ICD9 anastomosis codes are not specific for lap vs open, it's assume that if the original procedure was laparoscopic / open, then the anastomosis was the same
+- Defined prolonged LOS as LOS > 3 (days)
+
+TODOs:
+- Re-vamped inclusion criteria but still have to run
+- At some point need to re-run firstPassFilter. Changes shouldn't have made a difference but need to make sure
+- Need to make sure lap / open proc and anastomosis codes match the V2 document

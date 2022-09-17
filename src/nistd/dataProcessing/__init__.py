@@ -23,6 +23,42 @@ diagnosis_icd10 = ["C20", "C19"]
 
 diagnosis_codes = diagnosis_icd9 + diagnosis_icd10
 
+# Anastomotic leak
+anastomotic_leak_codes = [
+    "56981",
+    "56722",
+    "99749",
+    "99859",
+    "5695",
+    "K632",
+    "K651",
+    "K9189",
+    "K6811",
+    "K630",
+]
+
+# Infection
+infection_codes = [
+    "99859",
+    "99592",
+    "78552",
+    "56721",
+    "56729",
+    "5679",
+    "T814XXA",
+    "T814",
+    "T8140XA",
+    "T8141XA",
+    "T8142XA",
+    "T8143XA",
+    "T8144XA",
+    "T8149XA",
+    "R6520",
+    "R6521",
+    "K650",
+    "K659",
+]
+
 
 class ProcClass(Enum):
     OPEN = auto()
