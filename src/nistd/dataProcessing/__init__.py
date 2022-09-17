@@ -5,7 +5,7 @@ from nistd import icdcodes
 from enum import Enum, auto
 
 
-label_cols = ["DIED", "PROLONGED_LOS", "OR_RETURN"]
+label_cols = ["DIED", "PROLONGED_LOS", "ANASTOMOTIC_LEAK", "INFECTION"]
 categorical_cols = [
     "SEX",
     "HOSP_LOCTEACH",

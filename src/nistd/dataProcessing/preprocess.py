@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
         df_out = df_out.rename(columns={"FEMALE": "SEX"})
 
-        df_out["PROLONGED_LOS"] = df_in["LOS"] > 3
+        df_out["PROLONGED_LOS"] = df_in["LOS"] > 10
 
         def has_anastomotic_leak(row):
             return row[proc_cols].isin(pclass.getAnastomosisCodes)
