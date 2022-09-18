@@ -51,6 +51,8 @@ def buildcache():
         counts = counts.reset_index()
         counts.columns = ["Year", count_col_name]
 
+        return counts
+
     proc_counts = organaze_as_counts(proc_df, "# Procedures")
     proc_anast_counts = organaze_as_counts(proc_anast_df, "# Procedures + Anastomosis")
     dx_counts = organaze_as_counts(dx_df, "# Diagnoses")
@@ -74,7 +76,7 @@ if __name__ == "__main__":
     combined_counts = combined_counts.set_index("Year")
     sns.set_theme()
     ax = sns.lineplot(data=combined_counts)
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
+    # ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.set_title("Procedures and Diagnoses by Year")
 
