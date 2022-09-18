@@ -2,11 +2,11 @@ import statsmodels.formula.api as sm
 import numpy as np
 import pandas as pd
 from scipy.stats import fisher_exact
-from nistd.dataProcessing import get_dtypes, label_cols, categorical_cols
+from nistd.dataProcessing import get_dtypes, label_cols, categorical_cols, ProcClass
 from nistd import logging
 
 
-def lr_or(df: pd.DataFrame):
+def lr_or(df: pd.DataFrame, pclass: ProcClass):
     """
     Use a logistic regression model to compute Odds Ratios
     """
@@ -80,7 +80,7 @@ def lr_or(df: pd.DataFrame):
         # https://stackoverflow.com/questions/22431503/specifying-which-category-to-treat-as-the-base-with-statsmodels
         print(table3)
 
-        save_path = f"results/table3_{outcome}.csv"
+        save_path = f"results/table3_{outcome}_{pclass.name}.csv"
         logging.info(f"Computation complete, saving to {save_path}")
 
         table3.to_csv(save_path)
@@ -138,5 +138,6 @@ def lr_manual(df: pd.DataFrame):
 
 
 if __name__ == "__main__":
-    df = pd.read_csv("cache/preprocessed.csv")
-    lr_or(df)
+    for pclass in ProcClass:
+        df = pd.read_csv(f"cache/preprocessed_{pclass.name}.csv")
+        lr_or(df, pclass)

@@ -1,0 +1,22 @@
+,Odds Ratios,Lower CI,Upper CI,P Value
+AGE[T.True],6164664910832004.0,,,
+APRDRG_Severity[T.True],4517213529311197.0,0.0,inf,1.0
+APRDRG_Risk_Mortality[T.True],288683116002.4677,,,
+Medicaid (compared to: Private insurance),5.8930909680510036e-08,,,
+Medicare (compared to: Private insurance),79673901865226.12,,,
+No charge (compared to: Private insurance),0.16670842625502894,0.0,inf,1.0
+Other (compared to: Private insurance),0.00322312907611538,0.0,inf,1.0
+Self-pay (compared to: Private insurance),0.0007458252582957956,0.0,inf,1.0
+Asian or Pacific Islander (compared to: White),1.655041550890886e+16,0.0,inf,0.9987398074804402
+Black (compared to: White),6.281622230536946e-06,0.0,inf,1.0
+Hispanic (compared to: White),4.125353658247171e-08,0.0,inf,1.0
+Native American (compared to: White),0.2188068365478194,0.0,inf,1.0
+Other (compared to: White),0.00012210209316651955,0.0,inf,1.0
+Unknown (compared to: White),0.0001709429776440906,0.0,inf,1.0
+Female (compared to: Male),5.793201636546653e-28,0.0,inf,0.9999999999999997
+Rural (compared to: Urban teaching),0.005233250617349146,0.0,inf,1.0
+Urban nonteaching (compared to: Urban teaching),1.9001345521641473e-12,,,
+Midwest (compared to: South),3.6945051510083065e-15,,,
+Northeast (compared to: South),3.977212639717079e-20,0.0,inf,0.9999999999978015
+West (compared to: South),5.040739453307023e-19,0.0,inf,0.9999999999999999
+INCOME_QRTL[T.True],1.312289620283853e-35,0.0,inf,1.0

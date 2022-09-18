@@ -1,5 +1,5 @@
 Design decisions:
-- Not using codes in grey-ed out column 
+- Using codes in grey-ed out column 
 - Because ICD9 anastomosis codes are not specific for lap vs open, it's assume that if the original procedure was laparoscopic / open, then the anastomosis was the same
 - Defined prolonged LOS as LOS > 10 (days)
 

@@ -100,14 +100,16 @@ if __name__ == "__main__":
 
         df_out = df_out.rename(columns={"FEMALE": "SEX"})
 
-        df_out["PROLONGED_LOS"] = df_in["LOS"] > 10
+        df_out["PROLONGED_LOS"] = (df_in["LOS"] > 10).astype(int)
 
         def has_anastomotic_leak(row):
             return row[proc_cols].isin(pclass.getAnastomosisCodes)
 
         df_out["ANASTOMOTIC_LEAK"] = (
             df_in[dx_cols].isin(anastomotic_leak_codes).any("columns")
+        ).astype(int)
+        df_out["INFECTION"] = (
+            df_in[dx_cols].isin(infection_codes).any("columns").astype(int)
         )
-        df_out["INFECTION"] = df_in[dx_cols].isin(infection_codes).any("columns")
 
         df_out.to_csv(f"cache/preprocessed_{pclass.name}.csv", index=False)
