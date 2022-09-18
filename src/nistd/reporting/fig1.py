@@ -16,6 +16,7 @@ import os
 
 def buildcache():
     proc_df = pd.DataFrame()
+    proc_anast_df = pd.DataFrame()
     dx_df = pd.DataFrame()
 
     all_proc_codes = (
@@ -35,24 +36,27 @@ def buildcache():
 
         for chunk in pd.read_stata(fname, columns=used_cols, chunksize=10**5):
             proc_chunk = chunk[chunk[proc_cols].isin(all_proc_codes).any("columns")]
-            proc_chunk = proc_chunk[
+            proc_anast_chunk = proc_chunk[
                 proc_chunk[proc_cols].isin(all_anastomosis_codes).any("columns")
             ]
 
             dx_chunk = chunk[chunk[dx_cols].isin(diagnosis_codes).any("columns")]
 
             proc_df = proc_df.append(proc_chunk)
+            proc_anast_df = proc_anast_df.append(proc_anast_chunk)
             dx_df = dx_df.append(dx_chunk)
 
-    proc_counts = proc_df["YEAR"].value_counts().sort_index()
-    proc_counts = proc_counts.reset_index()
-    proc_counts.columns = ["Year", "Number of Procedures"]
+    def organaze_as_counts(df: pd.DataFrame, count_col_name: str):
+        counts = df["YEAR"].value_counts().sort_index()
+        counts = counts.reset_index()
+        counts.columns = ["Year", count_col_name]
 
-    dx_counts = dx_df["YEAR"].value_counts().sort_index()
-    dx_counts = dx_counts.reset_index()
-    dx_counts.columns = ["Year", "Number of Diagnoses"]
+    proc_counts = organaze_as_counts(proc_df, "# Procedures")
+    proc_anast_counts = organaze_as_counts(proc_anast_df, "# Procedures + Anastomosis")
+    dx_counts = organaze_as_counts(dx_df, "# Diagnoses")
 
-    combined_counts = pd.merge(proc_counts, dx_counts, how="left", on="Year")
+    combined_counts = pd.merge(proc_counts, proc_anast_counts, how="left", on="Year")
+    combined_counts = pd.merge(combined_counts, dx_counts, how="left", on="Year")
 
     combined_counts.to_csv("cache/fig1counts.csv", index=False)
 
@@ -67,9 +71,10 @@ if __name__ == "__main__":
         logging.info("Reusing cache found at cache/fig1counts.csv")
         combined_counts = pd.read_csv("cache/fig1counts.csv")
 
+    combined_counts = combined_counts.set_index("Year")
     sns.set_theme()
-    ax = sns.lineplot(x="Year", data=combined_counts, color="b")
-    # ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
+    ax = sns.lineplot(data=combined_counts)
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.set_title("Procedures and Diagnoses by Year")
 
