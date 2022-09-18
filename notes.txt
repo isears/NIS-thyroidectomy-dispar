@@ -4,8 +4,6 @@ Design decisions:
 - Defined prolonged LOS as LOS > 10 (days)
 
 TODOs:
-- Re-vamped inclusion criteria but still have to run
-- At some point need to re-run firstPassFilter. Changes shouldn't have made a difference but need to make sure
+- Fig1 needs both diagnoses and procedures
 - Need to make sure lap / open proc and anastomosis codes match the V2 document
 - Seem to be missing some ICD10 codes for procedures, anastomosis, and / or diagnoses of interest
-- Figure 1 needs to revamped (see specific requirements in V2 document)

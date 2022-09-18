@@ -2,6 +2,7 @@ import pandas as pd
 from nistd.dataProcessing import get_dtypes
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
 if __name__ == "__main__":
     filtered_df = pd.read_csv(
@@ -16,8 +17,9 @@ if __name__ == "__main__":
     counts_df.columns = ["Year", "Number of Procedures"]
 
     sns.set_theme()
-    ax = sns.barplot(x="Year", y="Number of Procedures", data=counts_df, color="b")
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
+    ax = sns.lineplot(x="Year", y="Number of Procedures", data=counts_df, color="b")
+    # ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.set_title("Procedures by Year")
 
     plt.savefig("results/fig1.png")
