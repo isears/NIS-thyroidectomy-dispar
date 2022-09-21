@@ -18,8 +18,8 @@ categorical_cols = [
 continuous_cols = ["LOS", "AGE"]
 
 # Malignant neoplasm of rectum / rectosigmoid junction
-diagnosis_icd9 = ["1541", "154"]
-diagnosis_icd10 = ["C20", "C19"]
+diagnosis_icd9 = ["1541"]
+diagnosis_icd10 = ["C20"]
 
 diagnosis_codes = diagnosis_icd9 + diagnosis_icd10
 
