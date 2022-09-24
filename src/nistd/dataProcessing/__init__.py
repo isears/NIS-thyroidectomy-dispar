@@ -59,16 +59,29 @@ infection_codes = [
     "K659",
 ]
 
+# Modified inclusion criteria for ICD-10 coding practices that underestimate # of cases and how they're entered
+procedure_only_codes = ["4869", "0DBP0ZZ", "4851", "0DBP3ZZ", "0DBP4ZZ", "0DBP8ZZ"]
+
 
 class ProcClass(Enum):
     OPEN = auto()
     LAPAROSCOPIC = auto()
 
     def getProcCodes(self):
-        return pkg_resources.read_text(icdcodes, f"proc_{self.name}.txt").split()
+        codes = pkg_resources.read_text(icdcodes, f"proc_{self.name}.txt").split()
+        assert (
+            len(codes) > 0
+        ), "[-] Error: didn't get any codes from resource file. Path correct?"
+        return codes
 
     def getAnastomosisCodes(self):
-        return pkg_resources.read_text(icdcodes, f"anastomosis_{self.name}.txt").split()
+        codes = pkg_resources.read_text(
+            icdcodes, f"anastomosis_{self.name}.txt"
+        ).split()
+        assert (
+            len(codes) > 0
+        ), "[-] Error: didn't get any codes from resource file. Path correct?"
+        return codes
 
 
 def get_proc_cols(all_cols):

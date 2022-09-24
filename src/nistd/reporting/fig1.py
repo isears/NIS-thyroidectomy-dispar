@@ -7,6 +7,7 @@ from nistd.dataProcessing import (
     diagnosis_codes,
     anastomotic_leak_codes,
     infection_codes,
+    procedure_only_codes,
 )
 from nistd import logging
 import seaborn as sns
@@ -27,7 +28,8 @@ def buildcache():
         ProcClass.LAPAROSCOPIC.getProcCodes() + ProcClass.OPEN.getProcCodes()
     )
     all_anastomosis_codes = (
-        ProcClass.LAPAROSCOPIC.getAnastomosisCodes() + ProcClass.OPEN.getProcCodes()
+        ProcClass.LAPAROSCOPIC.getAnastomosisCodes()
+        + ProcClass.OPEN.getAnastomosisCodes()
     )
 
     for fname in glob.glob("./data/*.dta"):
@@ -43,6 +45,12 @@ def buildcache():
             proc_anast_chunk = proc_chunk[
                 proc_chunk[proc_cols].isin(all_anastomosis_codes).any("columns")
             ]
+
+            # Modified inclusion criteria: also include certain procedure codes w/out anastomosis
+            proc_only_chunk = chunk[
+                chunk[proc_cols].isin(procedure_only_codes).any("columns")
+            ]
+            proc_anast_chunk = proc_anast_chunk.append(proc_only_chunk)
 
             dx_chunk = chunk[chunk[dx_cols].isin(diagnosis_codes).any("columns")]
 
