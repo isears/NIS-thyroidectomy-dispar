@@ -8,7 +8,6 @@ from nistd.dataProcessing import (
     get_dx_cols,
     get_proc_cols,
     ProcClass,
-    procedure_only_codes,
 )
 from nistd import logging
 from concurrent.futures import ProcessPoolExecutor
@@ -25,6 +24,10 @@ class ParallelFilter:
             ProcClass.LAPAROSCOPIC.getAnastomosisCodes()
             + ProcClass.OPEN.getAnastomosisCodes()
         )
+        self.all_proconly_codes = (
+            ProcClass.LAPAROSCOPIC.getProcOnlyCodes()
+            + ProcClass.OPEN.getProcOnlyCodes()
+        )
 
         logging.info(f"[*] Procedure codes ({len(self.all_proc_codes)}):")
         logging.info(self.all_proc_codes)
@@ -32,8 +35,8 @@ class ParallelFilter:
         logging.info(diagnosis_codes)
         logging.info(f"[*] Anastomosis codes ({len(self.all_anastomosis_codes)}):")
         logging.info(self.all_anastomosis_codes)
-        logging.info(f"[*] Procedure only codes: ({len(procedure_only_codes)}):")
-        logging.info(procedure_only_codes)
+        logging.info(f"[*] Procedure only codes: ({len(self.all_proconly_codes)}):")
+        logging.info(self.all_proconly_codes)
 
     def handle_single_file(self, fname):
         df = pd.read_parquet(fname)
@@ -48,7 +51,10 @@ class ParallelFilter:
 
         # Expanded inclusion criteria
         relevant = relevant.append(
-            df[df[proc_cols].isin(procedure_only_codes).any(axis="columns")]
+            df[
+                df[proc_cols].isin(self.all_proconly_codes).any(axis="columns")
+                & ~df[proc_cols].isin(self.all_anastomosis_codes).any(axis="columns")
+            ]
         )
 
         relevant = relevant[relevant[dx_cols].isin(diagnosis_codes).any(axis="columns")]

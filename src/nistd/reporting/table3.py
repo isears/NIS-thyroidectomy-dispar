@@ -1,5 +1,6 @@
 import statsmodels.formula.api as sm
 import numpy as np
+from numpy.linalg import LinAlgError
 import pandas as pd
 from scipy.stats import fisher_exact
 from nistd.dataProcessing import get_dtypes, label_cols, categorical_cols, ProcClass
@@ -47,43 +48,47 @@ def lr_or(df: pd.DataFrame, pclass: ProcClass):
 
         logging.info(f"Formula string: {formula_str}")
         lr = sm.logit(formula_str, data=df)
-        res = lr.fit_regularized()
 
-        odds_ratios = np.exp(res.params)
-        lower_ci = np.exp(res.conf_int()[0])
-        upper_ci = np.exp(res.conf_int()[1])
+        try:
+            res = lr.fit_regularized()
 
-        def unwrap_pnames(param_name: str):
-            try:
-                ref = param_name.split("'")[1]
-                var = param_name[param_name.index("T.") + 2 : -1]
+            odds_ratios = np.exp(res.params)
+            lower_ci = np.exp(res.conf_int()[0])
+            upper_ci = np.exp(res.conf_int()[1])
 
-                return f"{var} (compared to: {ref})"
-            except IndexError:
-                return param_name
+            def unwrap_pnames(param_name: str):
+                try:
+                    ref = param_name.split("'")[1]
+                    var = param_name[param_name.index("T.") + 2 : -1]
 
-        table3 = pd.DataFrame(
-            data={
-                "Odds Ratios": odds_ratios,
-                "Lower CI": lower_ci,
-                "Upper CI": upper_ci,
-                "P Value": res.pvalues,
-            },
-            index=res.params.index,  # .map(unwrap_pnames),
-        )
+                    return f"{var} (compared to: {ref})"
+                except IndexError:
+                    return param_name
 
-        table3.index = table3.index.map(unwrap_pnames)
-        table3 = table3.drop(index="Intercept")
+            table3 = pd.DataFrame(
+                data={
+                    "Odds Ratios": odds_ratios,
+                    "Lower CI": lower_ci,
+                    "Upper CI": upper_ci,
+                    "P Value": res.pvalues,
+                },
+                index=res.params.index,  # .map(unwrap_pnames),
+            )
 
-        # TODO: Every class has one group that doesn't appear in params b/c it's the reference class
-        # Need to do a better job of selecting this
-        # https://stackoverflow.com/questions/22431503/specifying-which-category-to-treat-as-the-base-with-statsmodels
-        print(table3)
+            table3.index = table3.index.map(unwrap_pnames)
+            table3 = table3.drop(index="Intercept")
 
-        save_path = f"results/table3_{outcome}_{pclass.name}.csv"
-        logging.info(f"Computation complete, saving to {save_path}")
+            # TODO: Every class has one group that doesn't appear in params b/c it's the reference class
+            # Need to do a better job of selecting this
+            # https://stackoverflow.com/questions/22431503/specifying-which-category-to-treat-as-the-base-with-statsmodels
+            print(table3)
 
-        table3.to_csv(save_path)
+            save_path = f"results/table3_{outcome}_{pclass.name}.csv"
+            logging.info(f"Computation complete, saving to {save_path}")
+
+            table3.to_csv(save_path)
+        except LinAlgError as e:
+            logging.warning(f"Singular matrix for outcome {outcome} ({pclass})")
 
 
 def lr_manual(df: pd.DataFrame):

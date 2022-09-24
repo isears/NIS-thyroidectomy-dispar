@@ -62,7 +62,7 @@ def validate(df: pd.DataFrame) -> None:
 
 if __name__ == "__main__":
     for pclass in ProcClass:
-        df_in = pd.read_csv(f"cache/filtered_{pclass.name}.csv", dtype=get_dtypes())
+        df_in = pd.read_parquet(f"cache/filtered_{pclass.name}.parquet")
         df_out = pd.DataFrame()
 
         copy_cols = [

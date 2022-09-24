@@ -5,9 +5,6 @@ from nistd.dataProcessing import label_cols, categorical_cols, get_dtypes, ProcC
 if __name__ == "__main__":
     for pclass in ProcClass:
         processed_df = pd.read_csv(f"cache/preprocessed_{pclass.name}.csv")
-        filtered_df = pd.read_csv(
-            f"cache/filtered_{pclass.name}.csv", dtype=get_dtypes()
-        )
 
         categoricals = processed_df[
             [c for c in processed_df.columns if c in categorical_cols]
@@ -31,8 +28,8 @@ if __name__ == "__main__":
             )
 
         # Get age mean / sem
-        age_mean = filtered_df["AGE"].mean()
-        age_sem = filtered_df["AGE"].std() / np.sqrt(len(filtered_df))
+        age_mean = processed_df["AGE"].mean()
+        age_sem = processed_df["AGE"].std() / np.sqrt(len(processed_df))
         as_str = f"{age_mean:.2f} +/- {age_sem:.2f}"
         table1_df = pd.concat(
             [pd.DataFrame(data={"N (%)": as_str}, index=["Age mean"]), table1_df]

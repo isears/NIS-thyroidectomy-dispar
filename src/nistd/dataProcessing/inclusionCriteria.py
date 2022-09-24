@@ -44,7 +44,7 @@ class InclusionCriteria:
 
     def _ic_prefix(self, df_in: pd.DataFrame) -> pd.DataFrame:
         # Assume that if the original procedure was laparoscopic, the anastomosis was as well
-        proc_codes = self.pclass.getProcCodes()
+        proc_codes = self.pclass.getProcCodes() + self.pclass.getProcOnlyCodes()
         return df_in[
             df_in[get_proc_cols(df_in.columns)].isin(proc_codes).any(axis="columns")
         ]
@@ -69,7 +69,7 @@ class InclusionCriteria:
 if __name__ == "__main__":
 
     for pclass in ProcClass:
-        df = pd.read_csv("cache/rectalcancer.csv", dtype=get_dtypes())
+        df = pd.read_parquet("cache/rectalcancer.parquet")
         ic = InclusionCriteria(df, pclass)
         filtered = ic.apply_ic()
-        filtered.to_csv(f"cache/filtered_{pclass.name}.csv")
+        filtered.to_parquet(f"cache/filtered_{pclass.name}.parquet")

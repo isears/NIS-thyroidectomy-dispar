@@ -5,7 +5,7 @@ from nistd.dataProcessing import label_cols, get_dtypes, ProcClass
 if __name__ == "__main__":
     for pclass in ProcClass:
         processed_df = pd.read_csv(f"cache/preprocessed_{pclass.name}.csv")
-        filtered_df = pd.read_csv(f"cache/filtered_{pclass.name}.csv", dtype=get_dtypes())
+        filtered_df = pd.read_parquet(f"cache/filtered_{pclass.name}.parquet")
 
         outcomes_df = processed_df[[c for c in processed_df.columns if c in label_cols]]
 
