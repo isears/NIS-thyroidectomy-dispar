@@ -38,11 +38,8 @@ class ParallelFilter:
         logging.info(f"[*] Procedure only codes: ({len(self.all_proconly_codes)}):")
         logging.info(self.all_proconly_codes)
 
-    def handle_single_file(self, fname):
-        df = pd.read_parquet(fname)
-
+    def _get_relevant_procedures(self, df):
         proc_cols = get_proc_cols(df.columns)
-        dx_cols = get_dx_cols(df.columns)
 
         relevant = df[df[proc_cols].isin(self.all_proc_codes).any(axis="columns")]
         relevant = relevant[
@@ -57,9 +54,40 @@ class ParallelFilter:
             ]
         )
 
+        return relevant
+
+    def single_file_filter(self, fname):
+        df = pd.read_parquet(fname)
+
+        dx_cols = get_dx_cols(df.columns)
+
+        relevant = self._get_relevant_procedures(df)
         relevant = relevant[relevant[dx_cols].isin(diagnosis_codes).any(axis="columns")]
 
         return relevant
+
+    def single_file_yearcount(self, fname):
+        """
+        For building fig 1
+        """
+        df = pd.read_parquet(fname)
+
+        dx_cols = get_dx_cols(df.columns)
+
+        relevant_procs = self._get_relevant_procedures(df)
+        relevant_diagnoses = df[df[dx_cols].isin(diagnosis_codes).any(axis="columns")]
+
+        def organaze_as_counts(df: pd.DataFrame):
+            counts = df["YEAR"].value_counts().sort_index()
+            counts = counts.reset_index()
+            counts.columns = ["Year", "Count"]
+
+            return counts
+
+        proc_counts = organaze_as_counts(relevant_procs)
+        dx_counts = organaze_as_counts(relevant_diagnoses)
+
+        return proc_counts, dx_counts
 
 
 if __name__ == "__main__":
@@ -69,7 +97,7 @@ if __name__ == "__main__":
         fnames = glob.glob("data-slow/*.parquet")
         res = list(
             tqdm(
-                executor.map(parallel_filter.handle_single_file, fnames),
+                executor.map(parallel_filter.single_file_filter, fnames),
                 total=len(fnames),
             )
         )
