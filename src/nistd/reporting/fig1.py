@@ -20,18 +20,28 @@ if __name__ == "__main__":
             )
         )
 
-    allcounts_procs = pd.concat([proc_df for proc_df, _ in res]).rename(
+    allcounts_procs = pd.concat([proc_df for proc_df, _, _ in res]).rename(
         columns={"Count": "Procedures"}
     )
-    allcounts_dx = pd.concat([dx_df for _, dx_df in res]).rename(
+
+    allcounts_procdx = pd.concat([procdx_df for _, procdx_df, _ in res]).rename(
+        columns={"Count": "Procedures with Diagnoses"}
+    )
+
+    allcounts_dx = pd.concat([dx_df for _, _, dx_df in res]).rename(
         columns={"Count": "Diagnoses"}
     )
 
     allcounts_procs = allcounts_procs.groupby("Year").sum()
+    allcounts_procdx = allcounts_procdx.groupby("Year").sum()
     allcounts_dx = allcounts_dx.groupby("Year").sum()
 
     allcounts = pd.merge(
         allcounts_procs, allcounts_dx, how="left", left_index=True, right_index=True
+    )
+
+    allcounts = pd.merge(
+        allcounts, allcounts_procdx, how="left", left_index=True, right_index=True
     )
 
     sns.set_theme()

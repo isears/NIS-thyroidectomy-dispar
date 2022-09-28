@@ -75,6 +75,9 @@ class ParallelFilter:
         dx_cols = get_dx_cols(df.columns)
 
         relevant_procs = self._get_relevant_procedures(df)
+        proc_and_dx = relevant_procs[
+            relevant_procs[dx_cols].isin(diagnosis_codes).any(axis="columns")
+        ]
         relevant_diagnoses = df[df[dx_cols].isin(diagnosis_codes).any(axis="columns")]
 
         def organaze_as_counts(df: pd.DataFrame):
@@ -85,9 +88,10 @@ class ParallelFilter:
             return counts
 
         proc_counts = organaze_as_counts(relevant_procs)
+        proc_and_dx_counts = organaze_as_counts(proc_and_dx)
         dx_counts = organaze_as_counts(relevant_diagnoses)
 
-        return proc_counts, dx_counts
+        return proc_counts, proc_and_dx_counts, dx_counts
 
 
 if __name__ == "__main__":
