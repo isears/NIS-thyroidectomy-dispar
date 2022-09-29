@@ -7,7 +7,7 @@ from nistd.dataProcessing import get_dtypes, label_cols, categorical_cols, ProcC
 from nistd import logging
 
 
-def lr_or(df: pd.DataFrame, pclass: ProcClass):
+def lr_or(df: pd.DataFrame, pclass: str):
     """
     Use a logistic regression model to compute Odds Ratios
     """
@@ -17,24 +17,34 @@ def lr_or(df: pd.DataFrame, pclass: ProcClass):
         "SEX",
         "HOSP_LOCTEACH",
         "HOSP_REGION",
-        # "INCOME_QRTL",
         "PAY1",
         "RACE",
-        # "APRDRG_Severity",
-        # "APRDRG_Risk_Mortality",
     ]
+
+    # only include if data actually available
+    categoricals = [c for c in categoricals if c in df.columns]
+
+    # if "PROCEDURE_TYPE" in df.columns:
+    #     # categoricals = ["PROCEDURE_TYPE", "HOSP_LOCTEACH", "HOSP_REGION"]
+    #     categoricals.append("PROCEDURE_TYPE")
 
     independent_vars = [c for c in df.columns if c not in label_cols]
 
     # Binarize the non-categorical variables
-    df["INCOME_QRTL"] = df["INCOME_QRTL"] > 2
-    df["AGE"] = df["AGE"] > 65
-    df["APRDRG_Severity"] = df["APRDRG_Severity"] > 2
-    df["APRDRG_Risk_Mortality"] = df["APRDRG_Risk_Mortality"] > 2
+    if "INCOME_QRTL" in df.columns:
+        df["INCOME_QRTL"] = df["INCOME_QRTL"] > 2
+
+    if "AGE" in df.columns:
+        df["AGE"] = df["AGE"] > 65
+
+    if "APRDRG_Severity" in df.columns:
+        df["APRDRG_Severity"] = df["APRDRG_Severity"] > 2
+
+    if "APRDRG_Risk_Mortality" in df.columns:
+        df["APRDRG_Risk_Mortality"] = df["APRDRG_Risk_Mortality"] > 2
 
     for c in categoricals:
         # Set the reference category for every category as the category with the largest # of samples
-        # TODO: for one vs. rest odds ratios may just have to do several LR models, one for each category group
         reference_group = df[c].value_counts().index[0]
         independent_vars[
             independent_vars.index(c)
@@ -78,12 +88,9 @@ def lr_or(df: pd.DataFrame, pclass: ProcClass):
             table3.index = table3.index.map(unwrap_pnames)
             table3 = table3.drop(index="Intercept")
 
-            # TODO: Every class has one group that doesn't appear in params b/c it's the reference class
-            # Need to do a better job of selecting this
-            # https://stackoverflow.com/questions/22431503/specifying-which-category-to-treat-as-the-base-with-statsmodels
             print(table3)
 
-            save_path = f"results/table3_{outcome}_{pclass.name}.csv"
+            save_path = f"results/table3_{outcome}_{pclass}.csv"
             logging.info(f"Computation complete, saving to {save_path}")
 
             table3.to_csv(save_path)
@@ -143,6 +150,23 @@ def lr_manual(df: pd.DataFrame):
 
 
 if __name__ == "__main__":
+    all_classes = list()
+
     for pclass in ProcClass:
         df = pd.read_csv(f"cache/preprocessed_{pclass.name}.csv")
-        lr_or(df, pclass)
+
+        dfc = df.copy()
+
+        if pclass == ProcClass.LAPAROSCOPIC:
+            dfc["LAPAROSCOPIC"] = 1
+        else:
+            dfc["LAPAROSCOPIC"] = 0
+
+        all_classes.append(dfc)
+
+        lr_or(df, pclass.name)
+
+    combined_df = pd.concat(all_classes)
+    kept_columns = ["LAPAROSCOPIC", "HOSP_LOCTEACH", "HOSP_REGION"] + label_cols
+    combined_df = combined_df[kept_columns]
+    lr_or(combined_df, "combined")
