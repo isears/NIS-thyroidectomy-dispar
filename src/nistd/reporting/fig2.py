@@ -1,24 +1,35 @@
 import pandas as pd
-from nistd.dataProcessing import get_dtypes
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-if __name__ == "__main__":
-    filtered_df = pd.read_csv("cache/filtered.csv", dtype=get_dtypes(), index_col=0)
+from nistd.dataProcessing import categorical_lookup
 
-    medians_by_year = filtered_df[["YEAR", "LOS"]].groupby("YEAR").median()
-    medians_by_year.reset_index(inplace=True)
-    medians_by_year["YEAR"] = medians_by_year["YEAR"].astype(int)
-    medians_by_year = medians_by_year.rename(
-        {"YEAR": "Year", "LOS": "Median Length of Stay"}, axis=1
+
+if __name__ == "__main__":
+    filtered_df = pd.read_parquet("cache/filtered.parquet")
+    plottable_df = filtered_df[["YEAR", "HOSP_DIVISION"]]
+    plottable_df["HOSP_DIVISION"] = plottable_df["HOSP_DIVISION"].apply(
+        lambda x: categorical_lookup["HOSP_DIVISION"][int(x) - 1]
     )
 
+    plottable_df = plottable_df.groupby("HOSP_DIVISION").YEAR.value_counts().unstack(0)
+
+    plottable_df = pd.melt(plottable_df, ignore_index=False).reset_index()
+
+    plottable_df = plottable_df.rename(
+        columns={
+            "YEAR": "Year",
+            "HOSP_DIVISION": "Hospital Division",
+            "value": "Number of Procedures",
+        }
+    )
     sns.set_theme()
+    plt.figure(figsize=(10, 10))
     ax = sns.lineplot(
-        x="Year", y="Median Length of Stay", data=medians_by_year, color="b"
+        data=plottable_df, x="Year", y="Number of Procedures", hue="Hospital Division"
     )
 
     # ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
-    ax.set_title("Median Length of Stay for Thyroidectomy by Year")
+    ax.set_title("Thyroidectomies by Year, per Region")
 
     plt.savefig("results/fig2.png")
