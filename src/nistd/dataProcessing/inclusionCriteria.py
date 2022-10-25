@@ -6,7 +6,6 @@ Apply study inclusion criteria:
 """
 import pandas as pd
 from nistd import logging
-from nistd.dataProcessing import get_dtypes
 
 
 class InclusionCriteria:
@@ -25,7 +24,7 @@ class InclusionCriteria:
             "APRDRG_Severity",
             "APRDRG_Risk_Mortality",
             "HOSP_LOCTEACH",
-            "HOSP_REGION",
+            "HOSP_DIVISION",
             "DIED",
             "LOS",
         ]
@@ -59,7 +58,7 @@ class InclusionCriteria:
 
 
 if __name__ == "__main__":
-    df = pd.read_csv("cache/thyroidectomies.csv", dtype=get_dtypes())
+    df = pd.read_parquet("cache/thyroidectomies.parquet")
     ic = InclusionCriteria(df)
     filtered = ic.apply_ic()
-    filtered.to_csv("cache/filtered.csv")
+    filtered.to_parquet("cache/filtered.parquet")

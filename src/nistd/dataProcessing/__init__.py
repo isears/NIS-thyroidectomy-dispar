@@ -14,19 +14,28 @@ categorical_cols = [
 
 continuous_cols = ["LOS", "AGE"]
 
-# Malignant neoplasm of thyroid gland
-diagnosis_icd9 = ["193"]
-diagnosis_icd10 = ["C73"]
-
-diagnosis_codes = diagnosis_icd9 + diagnosis_icd10
-
 thyroidectomy_icd9 = [
-    "064",  # Complete thyroidectomy
-    "0652",  # Complete substernal thyroidectomy
+    "0631",
+    "0639",
+    "064",
+    "0650",
+    "0651",
+    "0652",
 ]
+
 thyroidectomy_icd10 = [
-    "0GTK0ZZ",  # Complete thyroidectomy (open)
-    "0GTK4ZZ",  # Complete thyroidectomy (percutaneous)
+    "0GTK0ZZ",
+    "0GTK4ZZ",
+    "0GTJ0ZZ",
+    "0GTJ4ZZ",
+    "0GTH0ZZ",
+    "0GBH0ZZ",
+    "0GTH4ZZ",
+    "0GBH3ZZ",
+    "0GTG0ZZ",
+    "0GBG0ZZ",
+    "0GTG4ZZ",
+    "0GBG3ZZ",
 ]
 
 thyroidectomy_codes = thyroidectomy_icd9 + thyroidectomy_icd10
@@ -50,10 +59,6 @@ def get_dx_cols(all_cols):
     icd10_cols = [col for col in all_cols if re.search("^I10_DX[0-9]{1,2}$", col)]
 
     return icd9_cols + icd10_cols
-
-
-def get_dtypes():
-    return pd.read_csv("cache/dtypes.csv", index_col=0).squeeze("columns").to_dict()
 
 
 categorical_lookup = {

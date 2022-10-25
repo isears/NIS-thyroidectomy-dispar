@@ -5,33 +5,69 @@ import pandas as pd
 import glob
 from nistd.dataProcessing import (
     thyroidectomy_codes,
-    diagnosis_codes,
-    get_dx_cols,
     get_proc_cols,
 )
+from nistd import logging
+from concurrent.futures import ProcessPoolExecutor
+from tqdm import tqdm
+
+
+class ParallelFilter:
+    def __init__(self) -> None:
+        logging.info("Initializing parallel filter...")
+        self.all_proc_codes = thyroidectomy_codes
+
+        logging.info(f"[*] Procedure codes ({len(self.all_proc_codes)}):")
+        logging.info(self.all_proc_codes)
+
+    def _get_relevant_procedures(self, df):
+        proc_cols = get_proc_cols(df.columns)
+
+        relevant = df[df[proc_cols].isin(self.all_proc_codes).any(axis="columns")]
+
+        return relevant
+
+    def single_file_filter(self, fname):
+        df = pd.read_parquet(fname)
+        relevant = self._get_relevant_procedures(df)
+        return relevant
+
+    def single_file_yearcount(self, fname):
+        """
+        For building fig 1
+        """
+        df = pd.read_parquet(fname)
+        relevant_procs = self._get_relevant_procedures(df)
+
+        def organaze_as_counts(df: pd.DataFrame):
+            counts = df["YEAR"].value_counts().sort_index()
+            counts = counts.reset_index()
+            counts.columns = ["Year", "Count"]
+
+            return counts
+
+        proc_counts = organaze_as_counts(relevant_procs)
+
+        return proc_counts
 
 
 if __name__ == "__main__":
-    df = pd.DataFrame()
+    parallel_filter = ParallelFilter()
 
-    for fname in glob.glob("./data/*.dta"):
-        print(f"[*] Processing {fname}")
+    with ProcessPoolExecutor(max_workers=16) as executor:
+        fnames = glob.glob("data-slow/*.parquet")
+        res = list(
+            tqdm(
+                executor.map(parallel_filter.single_file_filter, fnames),
+                total=len(fnames),
+            )
+        )
 
-        # In theory columns will remain consistent within a file, even if they change between files
-        cols = next(pd.read_stata(fname, chunksize=1)).columns
-        proc_cols = get_proc_cols(cols)
-        dx_cols = get_dx_cols(cols)
+    filtered_df = pd.concat(res)
 
-        for chunk in pd.read_stata(fname, chunksize=10**5):
-            chunk = chunk[
-                chunk[proc_cols].isin(thyroidectomy_codes).any(axis="columns")
-            ]
+    print(filtered_df)
 
-            chunk = chunk[chunk[dx_cols].isin(diagnosis_codes).any(axis="columns")]
+    # Pyarrow (parquet) complains if this column is dealt with
+    filtered_df.HOSPSTCO = filtered_df.HOSPSTCO.astype("str")
 
-            df = df.append(chunk)
-
-        # Monitor memory usage
-        df.info()
-
-    df.to_csv("./cache/thyroidectomies.csv", index=False)
+    filtered_df.to_parquet("./cache/rectalcancer.parquet", index=False)
