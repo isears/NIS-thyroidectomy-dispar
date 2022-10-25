@@ -1,10 +1,9 @@
 import pandas as pd
-from nistd.dataProcessing import get_dtypes
 import seaborn as sns
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
-    filtered_df = pd.read_csv("cache/filtered.csv", dtype=get_dtypes(), index_col=0)
+    filtered_df = pd.read_parquet("cache/filtered.parquet")
     counts = filtered_df["YEAR"].value_counts().sort_index()
     counts_df = counts.reset_index()
     counts_df.columns = ["Year", "Number of Procedures"]
