@@ -16,7 +16,7 @@ def lr_or(df: pd.DataFrame):
         "SEX",
         "HOSP_LOCTEACH",
         # "HOSP_DIVISION",
-        # "HOSP_REGION",
+        "HOSP_REGION",
         # "INCOME_QRTL",
         "PAY1",
         "RACE",
@@ -24,9 +24,7 @@ def lr_or(df: pd.DataFrame):
         # "APRDRG_Risk_Mortality",
     ]
 
-    independent_vars = [
-        c for c in df.columns if c not in label_cols and c != "HOSP_REGION"
-    ]
+    independent_vars = [c for c in df.columns if c not in label_cols]
 
     # Binarize the non-categorical variables
     df["INCOME_QRTL"] = df["INCOME_QRTL"] > 2
@@ -83,7 +81,7 @@ def lr_or(df: pd.DataFrame):
         # https://stackoverflow.com/questions/22431503/specifying-which-category-to-treat-as-the-base-with-statsmodels
         print(table3)
 
-        save_path = f"results/table4_{outcome}.csv"
+        save_path = f"results/table5_{outcome}.csv"
         logging.info(f"Computation complete, saving to {save_path}")
 
         table3.to_csv(save_path)
@@ -134,7 +132,7 @@ def lr_manual(df: pd.DataFrame):
         )
 
         results_df.index = variables_df.columns
-        save_path = f"results/table4_{outcome_name}.csv"
+        save_path = f"results/table5_{outcome_name}.csv"
         logging.info(f"Computation complete, saving to {save_path}")
 
         results_df.to_csv(save_path)

@@ -5,6 +5,9 @@ from nistd.dataProcessing import categorical_lookup
 if __name__ == "__main__":
     processed_df = pd.read_csv("cache/preprocessed.csv")
 
+    # TODO: oooof
+    categorical_lookup["INCOME_QRTL"] = list(range(1, 5))
+
     categoricals = processed_df[
         [c for c in processed_df.columns if c in categorical_lookup]
     ]

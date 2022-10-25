@@ -54,7 +54,7 @@ def get_dx_cols(all_cols):
 
 
 categorical_lookup = {
-    "FEMALE": ["Male", "Female", "Unknown"],
+    "SEX": ["Male", "Female", "Unknown"],
     "RACE": [
         "White",
         "Black",

@@ -87,8 +87,8 @@ if __name__ == "__main__":
 
     for key, lookup_table in categorical_lookup.items():
         # FEMALE is 0, 1, but all other columns don't have a 0 val
-        if key == "FEMALE":
-            df_out[key] = df_out[key].apply(lambda x: lookup_table[x])
+        if key == "SEX":
+            df_out["FEMALE"] = df_out["FEMALE"].apply(lambda x: lookup_table[x])
         else:
             df_out[key] = df_out[key].apply(lambda x: lookup_table[x - 1])
 

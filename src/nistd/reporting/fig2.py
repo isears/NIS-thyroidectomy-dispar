@@ -1,6 +1,7 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
 from nistd.dataProcessing import categorical_lookup
 
@@ -30,6 +31,7 @@ if __name__ == "__main__":
     )
 
     # ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.set_title("Thyroidectomies by Year, per Region")
 
     plt.savefig("results/fig2.png")
