@@ -7,19 +7,19 @@ from nistd.dataProcessing import categorical_lookup
 
 if __name__ == "__main__":
     filtered_df = pd.read_parquet("cache/filtered.parquet")
-    plottable_df = filtered_df[["YEAR", "HOSP_DIVISION"]]
-    plottable_df["HOSP_DIVISION"] = plottable_df["HOSP_DIVISION"].apply(
-        lambda x: categorical_lookup["HOSP_DIVISION"][int(x) - 1]
+    plottable_df = filtered_df[["YEAR", "HOSP_REGION"]]
+    plottable_df["HOSP_REGION"] = plottable_df["HOSP_REGION"].apply(
+        lambda x: categorical_lookup["HOSP_REGION"][int(x) - 1]
     )
 
-    plottable_df = plottable_df.groupby("HOSP_DIVISION").YEAR.value_counts().unstack(0)
+    plottable_df = plottable_df.groupby("HOSP_REGION").YEAR.value_counts().unstack(0)
 
     plottable_df = pd.melt(plottable_df, ignore_index=False).reset_index()
 
     plottable_df = plottable_df.rename(
         columns={
             "YEAR": "Year",
-            "HOSP_DIVISION": "Hospital Division",
+            "HOSP_REGION": "Hospital Division",
             "value": "Number of Procedures",
         }
     )

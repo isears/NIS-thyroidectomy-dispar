@@ -24,7 +24,8 @@ class InclusionCriteria:
             "APRDRG_Severity",
             "APRDRG_Risk_Mortality",
             "HOSP_LOCTEACH",
-            "HOSP_DIVISION",
+            # "HOSP_DIVISION",
+            "HOSP_REGION",
             "DIED",
             "LOS",
         ]

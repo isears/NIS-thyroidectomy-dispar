@@ -15,7 +15,8 @@ def lr_or(df: pd.DataFrame):
     categoricals = [
         "SEX",
         "HOSP_LOCTEACH",
-        "HOSP_DIVISION",
+        # "HOSP_DIVISION",
+        "HOSP_REGION",
         # "INCOME_QRTL",
         "PAY1",
         "RACE",

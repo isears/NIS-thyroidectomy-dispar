@@ -27,7 +27,8 @@ if __name__ == "__main__":
         "RACE",
         "FEMALE",
         "HOSP_LOCTEACH",
-        "HOSP_DIVISION",
+        # "HOSP_DIVISION",
+        "HOSP_REGION",
     ]
 
     # FEMALE, RACE may have NAs
