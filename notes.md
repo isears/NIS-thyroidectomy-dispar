@@ -1,1 +1,2 @@
 - Of the entries that get dropped in the inclusion criteria, 80,441 (the vast majority) are because HOSP_DIVISION is na. Probably because HOSP_DIVISION didn't get added as a column until 2012
+- Some (10%) of the return-to-or events seemed to happen before the thyroidectomy procedure (procedure ID of return to OR was < procedure ID of thyroidectomy)
