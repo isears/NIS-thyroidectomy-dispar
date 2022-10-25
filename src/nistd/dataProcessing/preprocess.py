@@ -7,60 +7,15 @@ from nistd.dataProcessing import (
     thyroidectomy_codes,
     or_return_codes,
     get_proc_cols,
-    get_dtypes,
     label_cols,
     categorical_lookup,
 )
 import numpy as np
 
 
-def validate(df: pd.DataFrame) -> None:
-    def assert_binary(column_name: str):
-        assert df[column_name].isin([1.0, 0.0]).all()
-
-        ratio = df[column_name].sum() / len(df)
-        if ratio > 0.99 or ratio < 0.01:
-            logging.warning(f"High homogeneity in {column_name} ({ratio})")
-
-    for column in df.columns:
-        assert df[column].dtype == float, f"Found non-float column: {column}"
-        assert not df[column].isna().any(), f"{column} has nans"
-        assert not df[column].apply(lambda x: np.isinf(x)).any(), f"{column} has infs"
-
-    # SEX
-    sex_columns = [c for c in df.columns if c.startswith("SEX_")]
-    for sex_column in sex_columns:
-        assert_binary(sex_column)
-
-    # RACE
-    race_columns = [c for c in df.columns if c.startswith("RACE_")]
-    for race_column in race_columns:
-        assert_binary(race_column)
-
-    # Hospital type
-    hosp_type_columns = [c for c in df.columns if c.startswith("HOSP_LOCTEACH_")]
-    for hosp_type_column in hosp_type_columns:
-        assert_binary(hosp_type_column)
-
-    # Hospital region
-    hosp_region_columns = [c for c in df.columns if c.startswith("HOSP_REGION_")]
-    for hosp_region_column in hosp_region_columns:
-        assert_binary(hosp_region_column)
-
-    ## Outcomes
-    # LOS
-    assert_binary("PROLONGED_LOS")
-
-    # OR return
-    assert_binary("OR_RETURN")
-
-    # mortality
-    assert_binary("DIED")
-
-
 if __name__ == "__main__":
     # TODO: need to load ICD dx / proc columns as str, not float
-    df_in = pd.read_csv("cache/filtered.csv", dtype=get_dtypes())
+    df_in = pd.read_parquet("cache/filtered.parquet")
     df_out = pd.DataFrame()
 
     copy_cols = [
@@ -72,7 +27,7 @@ if __name__ == "__main__":
         "RACE",
         "FEMALE",
         "HOSP_LOCTEACH",
-        "HOSP_REGION",
+        "HOSP_DIVISION",
     ]
 
     # FEMALE, RACE may have NAs

@@ -81,5 +81,15 @@ categorical_lookup = {
         "Other",
     ],
     "HOSP_LOCTEACH": ["Rural", "Urban nonteaching", "Urban teaching"],
-    "HOSP_REGION": ["Northeast", "Midwest", "South", "West"],
+    "HOSP_DIVISION": [
+        "New England",
+        "Middle Atlantic",
+        "East North Central",
+        "West North Central",
+        "South Atlantic",
+        "East South Central",
+        "West South Central",
+        "Mountain",
+        "Pacific",
+    ],
 }
