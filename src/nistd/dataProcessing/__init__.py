@@ -3,14 +3,6 @@ import pandas as pd
 
 
 label_cols = ["DIED", "PROLONGED_LOS", "OR_RETURN"]
-categorical_cols = [
-    "SEX",
-    "HOSP_LOCTEACH",
-    "HOSP_REGION",
-    "INCOME_QRTL",
-    "PAY1",
-    "RACE",
-]
 
 continuous_cols = ["LOS", "AGE"]
 
