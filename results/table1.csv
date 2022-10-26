@@ -1,32 +1,32 @@
 ,N (%)
 Age mean,52.96 +/- 0.05
-AGE > 65,27041 (23.67)
-APRDRG_Risk_Mortality > 2,6134 (5.37)
-APRDRG_Severity > 2,9535 (8.35)
-[PAY1] Private insurance,64470 (56.44)
-[PAY1] Medicare,31483 (27.56)
-[PAY1] Medicaid,11225 (9.83)
-[PAY1] Other,3552 (3.11)
-[PAY1] Self-pay,2866 (2.51)
+AGE > 65,"27,041 (23.67)"
+APRDRG_Severity > 2,"9,535 (8.35)"
+APRDRG_Risk_Mortality > 2,"6,134 (5.37)"
+[PAY1] Private insurance,"64,470 (56.44)"
+[PAY1] Medicare,"31,483 (27.56)"
+[PAY1] Medicaid,"11,225 (9.83)"
+[PAY1] Other,"3,552 (3.11)"
+[PAY1] Self-pay,"2,866 (2.51)"
 [PAY1] No charge,633 (0.55)
-[RACE] White,63677 (55.75)
-[RACE] Unknown,17260 (15.11)
-[RACE] Black,14508 (12.70)
-[RACE] Hispanic,10485 (9.18)
-[RACE] Asian or Pacific Islander,4267 (3.74)
-[RACE] Other,3585 (3.14)
+[RACE] White,"63,677 (55.75)"
+[RACE] Unknown,"17,260 (15.11)"
+[RACE] Black,"14,508 (12.70)"
+[RACE] Hispanic,"10,485 (9.18)"
+[RACE] Asian or Pacific Islander,"4,267 (3.74)"
+[RACE] Other,"3,585 (3.14)"
 [RACE] Native American,447 (0.39)
-[SEX] Female,87931 (76.98)
-[SEX] Male,25563 (22.38)
+[SEX] Female,"87,931 (76.98)"
+[SEX] Male,"25,563 (22.38)"
 [SEX] Unknown,735 (0.64)
-[HOSP_LOCTEACH] Urban teaching,73710 (64.53)
-[HOSP_LOCTEACH] Urban nonteaching,34338 (30.06)
-[HOSP_LOCTEACH] Rural,6181 (5.41)
-[HOSP_REGION] South,36738 (32.16)
-[HOSP_REGION] Northeast,29120 (25.49)
-[HOSP_REGION] West,27336 (23.93)
-[HOSP_REGION] Midwest,21035 (18.41)
-[INCOME_QRTL] 4,34458 (30.17)
-[INCOME_QRTL] 3,28231 (24.71)
-[INCOME_QRTL] 2,26438 (23.14)
-[INCOME_QRTL] 1,25102 (21.98)
+[HOSP_LOCTEACH] Urban teaching,"73,710 (64.53)"
+[HOSP_LOCTEACH] Urban nonteaching,"34,338 (30.06)"
+[HOSP_LOCTEACH] Rural,"6,181 (5.41)"
+[HOSP_REGION] South,"36,738 (32.16)"
+[HOSP_REGION] Northeast,"29,120 (25.49)"
+[HOSP_REGION] West,"27,336 (23.93)"
+[HOSP_REGION] Midwest,"21,035 (18.41)"
+[INCOME_QRTL] 4,"34,458 (30.17)"
+[INCOME_QRTL] 3,"28,231 (24.71)"
+[INCOME_QRTL] 2,"26,438 (23.14)"
+[INCOME_QRTL] 1,"25,102 (21.98)"

@@ -5,6 +5,9 @@ from scipy.stats import fisher_exact
 from nistd.dataProcessing import label_cols
 from nistd import logging
 
+import docx
+from docx.shared import Inches
+
 
 def lr_or(df: pd.DataFrame):
     """
@@ -43,7 +46,12 @@ def lr_or(df: pd.DataFrame):
 
     independent_vars = " + ".join(independent_vars)
 
-    for outcome in label_cols:
+    doc = docx.Document()
+    table_doc = doc.add_table(rows=1, cols=1)
+    table_doc.autofit = True
+    table_doc.allow_autofit = True
+
+    for outcome_idx, outcome in enumerate(label_cols):
         formula_str = f"{outcome} ~ " + independent_vars
 
         logging.info(f"Formula string: {formula_str}")
@@ -86,56 +94,40 @@ def lr_or(df: pd.DataFrame):
 
         table3.to_csv(save_path)
 
+        col_cells = table_doc.add_column(Inches(2)).cells
+        col_cells[0].text = outcome
 
-def lr_manual(df: pd.DataFrame):
-    """
-    Manually compute odds ratios
-    """
-    variables_df = df[[c for c in df.columns if c not in label_cols]]
-    outcomes_df = df[[c for c in df.columns if c in label_cols]]
+        def add_single_row(row):
+            if not "South" in row.name:
+                return
 
-    for outcome_name in outcomes_df.columns:
-        logging.info(f"Computing ORs for {outcome_name}")
-        ors, pvals, lower_cis, upper_cis = list(), list(), list(), list()
-
-        for variable_name in variables_df.columns:
-
-            ct = pd.crosstab(variables_df[variable_name], outcomes_df[outcome_name])
-
-            # If ony part of the 2x2 is 0, we can't compute odds ratios
-            if 0 in ct.values or ct.shape != (2, 2):
-                logging.warning(f"{variable_name} had 0s in crosstab")
-                odds, p_value, lower_ci, upper_ci = [np.nan] * 4
+            if row["P Value"] < 0.01:
+                p_value = "< 0.01"
             else:
+                p_value = f"{row['P Value']:.2f}"
 
-                odds, p_value = fisher_exact(ct)
-                z_confidence = 1.96
-                root = np.sqrt(sum([1 / x for x in ct.values.flatten()]))
-                base = np.log(odds)
-                lower_ci, upper_ci = (
-                    np.exp(base - z_confidence * root),
-                    np.exp(base + z_confidence * root),
-                )
+            formatted_str = f"{row['Odds Ratios']:.2f} ({row['Lower CI']:.2f}, {row['Upper CI']:.2f}); {p_value}"
 
-            ors.append(odds)
-            pvals.append(p_value)
-            lower_cis.append(lower_ci)
-            upper_cis.append(upper_ci)
+            row_headers = [x.text for x in table_doc.column_cells(0)]
 
-        results_df = pd.DataFrame(
-            data={
-                "Odds Ratio": ors,
-                "Lower CI": lower_cis,
-                "Upper CI": upper_cis,
-                "P Value": pvals,
-            }
-        )
+            if not row.name in row_headers:
+                curr_row = table_doc.add_row().cells
+                curr_row[0].text = row.name
+            else:
+                curr_row = table_doc.row_cells(row_headers.index(row.name))
 
-        results_df.index = variables_df.columns
-        save_path = f"results/table5_{outcome_name}.csv"
-        logging.info(f"Computation complete, saving to {save_path}")
+            curr_row[outcome_idx + 1].text = formatted_str
 
-        results_df.to_csv(save_path)
+        table3.apply(add_single_row, axis=1)
+
+    table_doc.style = "Medium Grid 3 Accent 1"
+
+    # Set width to be reasonable
+    for row in table_doc.rows:
+        for cell in row.cells:
+            cell.width = Inches(2)
+
+    doc.save(f"results/table5.docx")
 
 
 if __name__ == "__main__":
